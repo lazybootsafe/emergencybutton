@@ -57,7 +57,7 @@ public class EmailSender {
 		if ("success" == responseBody) {
 			return true;
 		} else {
-			Log.e("EmailSender", "Failed sending email.");
+			Log.e("EmailSender", "Failed sending email: response \"" + responseBody + "\"");
 			return false;
 		}
 	}

@@ -1,7 +1,7 @@
 package com.emergency.button;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -13,26 +13,22 @@ public class Locator {
 	private static final int TWO_MINUTES = 1000 * 60 * 2;
 	public static Location location = null;
 	
-	public static LocationManager locationManager = null;
-	public static LocationListener locationListener;
+	private static LocationManager locationManager = null;
+	private static LocationListener locationListener;
 	
-    public interface BetterLocationListener{
+    public interface BetterLocationListener {
         void onBetterLocation(Location location);
     }
     
-    
-	public static void unregister() {
-		if (locationManager == null) {
+	// context - can be an activity or any other context
+    public Locator(final Context context, final BetterLocationListener bll) {
+		if (Locator.locationManager != null) {
+			Log.e("Locator", "registered twice!");
 			return;
 		}
 		
-		Locator.locationManager.removeUpdates(Locator.locationListener);
-		Locator.locationManager = null;
-	}
-	
-	public static void register(final Activity act, final BetterLocationListener bll) {
 		// Acquire a reference to the system Location Manager
-		locationManager = (LocationManager) act
+		Locator.locationManager = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 
 		//Toast.makeText(act.getBaseContext(), "Locator register", Toast.LENGTH_SHORT).show();
@@ -72,8 +68,17 @@ public class Locator {
 		// updates
 		locationManager.requestLocationUpdates(
 				LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-				0, locationListener);
+		locationManager.requestLocationUpdates(
+				LocationManager.GPS_PROVIDER, 0, 0, locationListener);    	
+    }
+    
+	public void unregister() {
+		if (locationManager == null) {
+			return;
+		}
+		
+		Locator.locationManager.removeUpdates(Locator.locationListener);
+		Locator.locationManager = null;
 	}
 
 	/**

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, EmergencyButton resource!</string>
     <string name="app_name">Emergency</string>
+    <string name="widget_loading">Widget Loading</string>
+    <string name="widget_error">Widget Error</string>
+    <string name="widget_message">Widget Message</string>
+    <string name="widget_name">Emergency Button</string>
 </resources>
