@@ -38,13 +38,13 @@ class EmailHandler(webapp.RequestHandler):
         self.response.out.write('success')
 
 class MainPage(webapp.RequestHandler):
-  def get(self):
+    def get(self):
 
-    template_values = {
-      }
+        template_values = {
+          }
 
-    path = os.path.join(os.path.dirname(__file__), 'index.html')
-    self.response.out.write(template.render(path, template_values))
+        path = os.path.join(os.path.dirname(__file__), 'index.html')
+        self.response.out.write(template.render(path, template_values))
 
 
 
@@ -56,7 +56,7 @@ application = webapp.WSGIApplication(
                                      debug=True)
 
 def main():
-  run_wsgi_app(application)
+    run_wsgi_app(application)
 
 if __name__ == "__main__":
-  main()
+    main()
