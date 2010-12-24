@@ -15,10 +15,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.util.Log;
+import android.widget.Toast;
 
 public class EmailSender {
-	public static void send(String to, String message)  {
-		sendWithEmailbyweb(to, message);
+	public static boolean send(String to, String message)  {
+		return EmailSender.sendWithEmailbyweb(to, message);
 	}
 	
 	public static boolean sendWithEmailbyweb(String to, String message) {
@@ -27,7 +28,7 @@ public class EmailSender {
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost("https://emailbyweb.appspot.com/email");
+		HttpPost httppost = new HttpPost("http://emailbyweb.appspot.com/email");
 
 		try {
 			// Add your data
@@ -54,7 +55,7 @@ public class EmailSender {
 			Log.e("EmailSender", e.getMessage(), e);
 		}
 		
-		if ("success" == responseBody) {
+		if ("success".equals(responseBody)) {
 			return true;
 		} else {
 			Log.e("EmailSender", "Failed sending email: response \"" + responseBody + "\"");

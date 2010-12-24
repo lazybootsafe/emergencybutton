@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+import android.util.Log;
 import android.view.View;
 
 public class EmergencyButton extends Activity {
@@ -76,7 +77,7 @@ public class EmergencyButton extends Activity {
 		this.updateTextEdits();
 
 		if ((Emergency.phoneNo.length() == 0) && (Emergency.emailAddress.length() == 0)) {
-			Toast.makeText(getBaseContext(), "Enter a phone number or email.",
+			Toast.makeText(this, "Enter a phone number or email.",
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
