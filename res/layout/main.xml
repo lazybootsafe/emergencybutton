@@ -1,91 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-    <TextView  
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent" 
         android:layout_height="wrap_content" 
-        android:text="Press this button in case of emergency"
-        />
-	<ImageButton
-	    android:id="@+id/btnEmergency"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:background="@drawable/emergency_button"
-	    android:layout_gravity="center"
-	    />
+	>
+	<LinearLayout 
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    >
 	    
-<!--    <Button -->
-<!--        android:id="@+id/btnEmergency"  -->
-<!--        android:layout_width="fill_parent" -->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="EMERGENCY!"-->
-<!--        />    -->
-<!--    <Button -->
-<!--        android:id="@+id/btnEmergency2"  -->
-<!--        android:layout_width="fill_parent" -->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="EMERGENCY!2"-->
-<!--        />    -->
+	    <TextView  
+	        android:layout_width="fill_parent" 
+	        android:layout_height="wrap_content" 
+	        android:text="Press this button in case of emergency"
+	        />
+		<ImageButton
+		    android:id="@+id/btnEmergency"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:background="@drawable/emergency_button"
+		    android:layout_gravity="center"
+		    />
+		    
+	    <TextView  
+	        android:layout_width="fill_parent" 
+	        android:layout_height="wrap_content" 
+	        android:text="Email of recipient (optional)"
+	        />     
+	    <EditText 
+	        android:id="@+id/txtEmail"  
+	        android:layout_width="fill_parent" 
+	        android:layout_height="wrap_content"
+	        android:inputType="textEmailAddress"        
+	        android:hint="dad@email.com"
+	        />
+	        
+	    <TextView
+	        android:layout_width="fill_parent" 
+	        android:layout_height="wrap_content" 
+	        android:text="Phone number of recipient (optional)"
+	        />     
+	    <EditText 
+	        android:id="@+id/txtPhoneNo"  
+	        android:layout_width="fill_parent" 
+	        android:layout_height="wrap_content"
+	        android:inputType="phone"        
+	        android:hint="(212)664-7665"
+	        />
+	        
+	    <TextView  
+	        android:layout_width="fill_parent" 
+	        android:layout_height="wrap_content"
+	        android:text="Message added in SMS and email"
+	        />     
+	    <EditText 
+	        android:id="@+id/txtMessage"  
+	        android:hint="John is in trouble"
+	        android:layout_width="fill_parent" 
+	        android:layout_height="120px"
+	        android:gravity="top"
+	        />          
+	</LinearLayout>
+</ScrollView>
 
-    <TextView  
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content" 
-        android:text="Email of recipient (optional)"
-        />     
-    <EditText 
-        android:id="@+id/txtEmail"  
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"        
-        android:hint="dad@email.com"
-        />
-    <TextView
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content" 
-        android:text="Phone number of recipient (optional)"
-        />     
-    <EditText 
-        android:id="@+id/txtPhoneNo"  
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content"
-        android:inputType="phone"        
-        android:hint="(212)664-7665"
-        />
-    <TextView  
-        android:layout_width="fill_parent" 
-        android:layout_height="wrap_content"
-        android:text="Message added in SMS and email"
-        />     
-    <EditText 
-        android:id="@+id/txtMessage"  
-        android:hint="John is in trouble"
-        android:layout_width="fill_parent" 
-        android:layout_height="120px"
-        android:gravity="top"         
-        />          
-</LinearLayout>
-
-
-<!--<TextView xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--  android:id="@+id/textview"-->
-<!--  android:layout_width="fill_parent"-->
-<!--  android:layout_height="fill_parent"-->
-<!--  android:text="@string/hello"/>-->
-  
-  
-<!--<?xml version="1.0" encoding="utf-8"?>-->
-<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:orientation="vertical"-->
-<!--    android:layout_width="fill_parent"-->
-<!--    android:layout_height="fill_parent"-->
-<!--    >-->
-<!--<TextView  -->
-<!--    android:layout_width="fill_parent" -->
-<!--    android:layout_height="wrap_content" -->
-<!--    android:text="@string/hello"-->
-<!--    />-->
-<!--</LinearLayout>-->

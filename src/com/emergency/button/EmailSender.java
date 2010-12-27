@@ -15,7 +15,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.util.Log;
-import android.widget.Toast;
 
 public class EmailSender {
 	public static boolean send(String to, String message)  {
@@ -28,7 +27,7 @@ public class EmailSender {
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost("http://emailbyweb.appspot.com/email");
+		HttpPost httppost = new HttpPost("https://emailbyweb.appspot.com/email");
 
 		try {
 			// Add your data

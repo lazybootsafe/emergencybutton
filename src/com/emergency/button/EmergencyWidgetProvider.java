@@ -76,7 +76,16 @@ public class EmergencyWidgetProvider extends AppWidgetProvider {
 		long pressLimit = now - TIME_BETWEEN_PRESSES;
 		if ((pressLimit < EmergencyWidgetProvider.button_clicked_time_1) && 
 			(pressLimit < EmergencyWidgetProvider.button_clicked_time_2)) {
-			Emergency.emergencyNow(context);
+			
+			//new Emergency().emDialog(context).show();
+			Intent myIntent = new Intent(context, EmergencyActivity.class);
+			
+			// FLAG_ACTIVITY_NEW_TASK is needed because we're not in an activity
+			// already, without it we crash.
+			myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			context.startActivity(myIntent);
+
+			//Emergency.emergencyNow(context);
 		}
 
 		super.onReceive(context, intent);

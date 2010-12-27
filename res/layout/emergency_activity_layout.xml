@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+	
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<ImageView   
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/gps_maps"
+			/>
+	    <TextView  
+	    	android:id="@+id/txtLocation"
+	        android:layout_width="fill_parent" 
+	        android:layout_height="fill_parent" 
+	        android:gravity="center_vertical"
+	        android:text="Getting location"
+	        />     
+	</LinearLayout>
+
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<ImageView   
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/textmessage"
+			/>
+	    <TextView  
+	    	android:id="@+id/txtSMS"
+	        android:layout_width="fill_parent" 
+	        android:layout_height="fill_parent" 
+	        android:gravity="center_vertical"
+	        android:text="sending SMS"
+	        />     
+	</LinearLayout>
+
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    >
+		<ImageView   
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/email"
+			/>
+	    <TextView  
+	    	android:id="@+id/txtEmail"
+	        android:layout_width="fill_parent" 
+	        android:layout_height="fill_parent" 
+	        android:gravity="center_vertical"
+	        android:text="sending email"
+	        />     
+	</LinearLayout>
+	
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:weightSum="1.0"
+	    >
+		<Button
+		    android:id="@+id/btnConfigure"
+		    android:layout_weight="0.5"
+			android:layout_width="0dip"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="bottom"
+	        android:text="Configure"
+		    />
+		<Button
+		    android:id="@+id/btnOkDone"
+		    android:layout_weight="0.5"
+			android:layout_width="0dip"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="bottom"
+	        android:text="Ok"
+		    />
+	</LinearLayout>
+	    
+</LinearLayout>

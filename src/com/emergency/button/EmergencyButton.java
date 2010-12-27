@@ -1,9 +1,12 @@
 package com.emergency.button;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
-import android.location.Location;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -11,7 +14,10 @@ import android.util.Log;
 import android.view.View;
 
 public class EmergencyButton extends Activity {
+	static final int EMERGENCY_DIALOG = 0;
 
+
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,12 +47,18 @@ public class EmergencyButton extends Activity {
 	{
 		super.onStart();
 	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		this.updateTextEdits();
+		this.finish();
+	}
 	
 	@Override
 	protected void onStop() {
 		super.onStop();
-
-		this.updateTextEdits();
 	}	
 
 	public void restoreTextEdits() {
@@ -76,14 +88,17 @@ public class EmergencyButton extends Activity {
 	public void redButtonPressed() {
 		this.updateTextEdits();
 
+		// TODO: maybe this is null?
 		if ((Emergency.phoneNo.length() == 0) && (Emergency.emailAddress.length() == 0)) {
 			Toast.makeText(this, "Enter a phone number or email.",
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		
-		Emergency.emergencyNow(this);
-		
+		//Emergency.emergencyNow(this);
+		//ProgressDialog dialog = ProgressDialog.show(this, "Sending Emergency Message", "Loading. Please wait...", true);
+		Intent myIntent = new Intent(EmergencyButton.this, EmergencyActivity.class);
+		EmergencyButton.this.startActivity(myIntent);
 	}
-
+    	
 }

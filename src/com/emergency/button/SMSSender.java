@@ -6,10 +6,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.telephony.SmsManager;
 import android.widget.Toast;
 
 public class SMSSender {
+	
+    public interface SMSListener {
+        public void onStatusUpdate(int resultCode, String resultString);
+    }	
+	
 	// ---sends an SMS message to another device---
 	public static void sendSMS(Context context, String phoneNumber, String message) {
 		PendingIntent pi = PendingIntent.getActivity(context, 0, new Intent(context,
@@ -18,9 +24,20 @@ public class SMSSender {
 		sms.sendTextMessage(phoneNumber, null, message, pi, null);
 	}
 
-	// ---sends an SMS message to another device---
+	// sends an SMS message and reports status with toasts
+	public static void safeSendSMS(final Context context, String phoneNumber, String message) {
+		SMSListener toastListener = new SMSListener() {
+			public void onStatusUpdate(int resultCode, String resultString) {
+				Toast.makeText(context, resultString,
+						Toast.LENGTH_SHORT).show();
+			}
+		};
+		
+		safeSendSMS(context, phoneNumber, message, toastListener);
+	}
+	
 	public static void safeSendSMS(final Context context, String phoneNumber,
-			String message) {
+			String message, final SMSListener listener) {
 		String SENT = "SMS_SENT";
 		String DELIVERED = "SMS_DELIVERED";
 
@@ -34,26 +51,22 @@ public class SMSSender {
 		context.registerReceiver(new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context arg0, Intent arg1) {
-				switch (getResultCode()) {
+				int resCode = getResultCode();
+				switch (resCode) {
 				case Activity.RESULT_OK:
-					Toast.makeText(context, "SMS sent",
-							Toast.LENGTH_SHORT).show();
+					listener.onStatusUpdate(resCode, "SMS sent");
 					break;
 				case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-					Toast.makeText(context, "Generic failure",
-							Toast.LENGTH_SHORT).show();
+					listener.onStatusUpdate(resCode, "Generic failure");
 					break;
 				case SmsManager.RESULT_ERROR_NO_SERVICE:
-					Toast.makeText(context, "No service",
-							Toast.LENGTH_SHORT).show();
+					listener.onStatusUpdate(resCode, "No service");
 					break;
 				case SmsManager.RESULT_ERROR_NULL_PDU:
-					Toast.makeText(context, "Null PDU",
-							Toast.LENGTH_SHORT).show();
+					listener.onStatusUpdate(resCode, "Null PDU");
 					break;
 				case SmsManager.RESULT_ERROR_RADIO_OFF:
-					Toast.makeText(context, "Radio off",
-							Toast.LENGTH_SHORT).show();
+					listener.onStatusUpdate(resCode, "Radio off");
 					break;
 				}
 			}
@@ -63,14 +76,13 @@ public class SMSSender {
 		context.registerReceiver(new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context arg0, Intent arg1) {
-				switch (getResultCode()) {
+				int resCode = getResultCode();
+				switch (resCode) {
 				case Activity.RESULT_OK:
-					Toast.makeText(context, "SMS delivered",
-							Toast.LENGTH_SHORT).show();
+					listener.onStatusUpdate(resCode, "SMS delivered");
 					break;
 				case Activity.RESULT_CANCELED:
-					Toast.makeText(context, "SMS not delivered",
-							Toast.LENGTH_SHORT).show();
+					listener.onStatusUpdate(resCode, "SMS not delivered");
 					break;
 				}
 			}
