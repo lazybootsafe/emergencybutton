@@ -15,6 +15,7 @@ class EmailHandler(webapp.RequestHandler):
         
         secret_code = self.request.get("secret")
         if secret_code != config.SECRET_CODE:
+            self.response.out.write('fail1')
             return
         
         to_addr = self.request.get("to")
@@ -24,6 +25,7 @@ class EmailHandler(webapp.RequestHandler):
         
         if not mail.is_email_valid(to_addr):
             # Return an error message...
+            self.response.out.write('fail2')
             return
 
         message = mail.EmailMessage()
@@ -35,14 +37,14 @@ class EmailHandler(webapp.RequestHandler):
 
         message.send()
         
-        self.response.out.write('success')
-
+        #self.response.out.write('success')
+        template_values = {}
+        path = os.path.join(os.path.dirname(__file__), 'success.html')
+        self.response.out.write(template.render(path, template_values))
+        
 class MainPage(webapp.RequestHandler):
     def get(self):
-
-        template_values = {
-          }
-
+        template_values = {}
         path = os.path.join(os.path.dirname(__file__), 'index.html')
         self.response.out.write(template.render(path, template_values))
 
