@@ -8,7 +8,7 @@
 	<style name="Theme" parent="android:Theme">
 	</style>
 	<style name="Theme.Translucent">
-	    <item name="android:windowBackground" >@drawable/appbackground</item>
+	    <!-- item name="android:windowBackground" >@drawable/appbackground</item> -->
 	    <item name="android:windowNoTitle">true</item>
 	    <item name="android:colorForeground">#fff</item>
   </style>

@@ -14,10 +14,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class EmergencyActivity extends Activity {
 
+	Location location = null;
+	Locator locator = null;
+	
+	public long buttonPressedTime = 0;
+	public long messageSentTime = 0;
+	
 	// Called when the activity is first created.
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,11 @@ public class EmergencyActivity extends Activity {
 		this.setLocationState("Waiting For Location");
 		this.setEmailState("...");
 		this.setSMSState("...");
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 		this.emergencyNow();
 	}
 	
@@ -51,7 +61,6 @@ public class EmergencyActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 		
-		this.finish();
 	}
 
 	protected void setLocationState(String state) {
@@ -74,52 +83,47 @@ public class EmergencyActivity extends Activity {
 		
 		final Context context = this;
 
-		// TODO: This buttonPressedTime / messageSentTime is a bad way of going
-		// about
-		// concurrency. Maybe do this some other way or with a lock?
+		// TODO: This buttonPressedTime and messageSentTime is a bad way of going
+		// about concurrency. Maybe do this some other way or with a lock?
 
 		// The button was pressed now.
-		Emergency.buttonPressedTime = SystemClock.elapsedRealtime();
+		this.buttonPressedTime = SystemClock.elapsedRealtime();
 
-		//Toast.makeText(context, "waiting for location update", Toast.LENGTH_SHORT).show();
-
-		if (Emergency.locator != null) {
+		if (this.locator != null) {
 			// no need to reinitialize the locator, note there's a race
 			// condition here
 			// TODO: lock or not?
 			return;
 		}
 
-		Emergency.locator = new Locator(context,
-				new Locator.BetterLocationListener() {
-			public void onBetterLocation(Location location) {
-				Log.v("Emergency", "got a location");
-				EmergencyActivity.this.setLocationState("Location found");
-				Emergency.location = location;
+		// TODO: maybe still send the distress signal after a while without a
+		// location?
+		this.locator = new Locator(context,	new EmergencyLocator());
+	}
+	
+	private class EmergencyLocator implements Locator.BetterLocationListener {
+		public void onBetterLocation(Location location) {
+			Log.v("Emergency", "got a location");
+			EmergencyActivity.this.setLocationState("Location found");
+			EmergencyActivity.this.location = location;
 
-				// messageSentTime is either 0 or the last time a
-				// message was sent.
-				// so if the button was pressed more recently, fire a
-				// message.
-				if (Emergency.messageSentTime < Emergency.buttonPressedTime) {
-
-					Emergency.messageSentTime = SystemClock
-					.elapsedRealtime();
+			// messageSentTime is either 0 or the last time a
+			// message was sent.
+			// so if the button was pressed more recently, fire a
+			// message.
+			if (EmergencyActivity.this.messageSentTime < EmergencyActivity.this.buttonPressedTime) {
+				try {
+					EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
 					EmergencyActivity.this.sendMessages();
-					Emergency.locator.unregister();
-					Emergency.locator = null;
+					EmergencyActivity.this.locator.unregister();
+				} finally {
+					EmergencyActivity.this.locator = null;
 				}
 			}
-		});
+		}
 	}
 	
 	private void sendMessages() {
-		final Context context = this;
-		// make sure all the fields are fresh and not null
-		Emergency.restore(context);
-		
-		// // TODO: maybe still send the distress signal after a while without a
-		// // location?
 
 		// these operations are going to block a bit so run them on another
 		// thread that won't interfere with the GUI. That way the user
@@ -137,6 +141,8 @@ public class EmergencyActivity extends Activity {
 		
 		public void run() {
 			final Context context = EmergencyActivity.this;
+			// make sure all the fields are fresh and not null
+			Emergency emergency = new Emergency(context);
 
 			
 			// mResults = doSomethingExpensive();
@@ -144,14 +150,15 @@ public class EmergencyActivity extends Activity {
 			// Do it, send all the stuff!
 
 			String locString = Double
-					.toString(Emergency.location.getLatitude())
+					.toString(EmergencyActivity.this.location.getLatitude())
 					+ ","
-					+ Double.toString(Emergency.location.getLongitude());
-			String textMessage = Emergency.message + " " + locString;
+					+ Double.toString(EmergencyActivity.this.location.getLongitude());
+			
+			String textMessage = emergency.message + " " + locString;
 			String mapsUrl = "http://maps.google.com/maps?q=" + locString;
-			String emailMessage = Emergency.message + "\n" + mapsUrl;
+			String emailMessage = emergency.message + "\n" + mapsUrl;
 
-			if (Emergency.phoneNo.length() > 0) {
+			if (emergency.phoneNo.length() > 0) {
 				this.setSMSState("sending sms");
 				// SMSSender.sendSMS(EmergencyButton.this, phoneNo,
 				// message);
@@ -161,17 +168,17 @@ public class EmergencyActivity extends Activity {
 						EmergencyThread.this.setSMSState(resultString);
 					}
 				};
-				SMSSender.safeSendSMS(context, Emergency.phoneNo, textMessage,
+				SMSSender.safeSendSMS(context, emergency.phoneNo, textMessage,
 						smsListener);
 			} else {
 				this.setSMSState("No phone number configured, not sending SMS.");
 			}
 
 			// TODO: maybe this is null?
-			if (Emergency.emailAddress.length() > 0) {
+			if (emergency.emailAddress.length() > 0) {
 				this.setEmailState("Sending email");
 				
-				boolean success = EmailSender.send(Emergency.emailAddress,
+				boolean success = EmailSender.send(emergency.emailAddress,
 						emailMessage);
 				if (success) {
 					setEmailState("Email sent");

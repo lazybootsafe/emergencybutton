@@ -6,7 +6,8 @@
     <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name=".EmergencyButton"
                   android:label="@string/app_name"
-                  android:theme="@style/Theme.Translucent">
+                  android:theme="@style/Theme.Translucent"
+                  android:launchMode="singleInstance"
                   >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,7 +17,8 @@
 
         <activity android:name=".EmergencyActivity"
                   android:label="SendEmergency"
-                  android:theme="@style/Theme.Translucent">
+                  android:theme="@style/Theme.Translucent"
+                  android:launchMode="singleInstance"
                   >
         </activity>
 

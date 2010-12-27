@@ -1,22 +1,17 @@
 package com.emergency.button;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import android.util.Log;
 import android.view.View;
 
 public class EmergencyButton extends Activity {
 	static final int EMERGENCY_DIALOG = 0;
 
-
+	Emergency emergency;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -52,8 +47,8 @@ public class EmergencyButton extends Activity {
 	protected void onPause() {
 		super.onPause();
 
-		this.updateTextEdits();
-		this.finish();
+		this.saveTextEdits();
+		//this.finish();
 	}
 	
 	@Override
@@ -66,30 +61,30 @@ public class EmergencyButton extends Activity {
 		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
-		Emergency.restore(this);
+		this.emergency = new Emergency(this);
 		
-		txtPhoneNo.setText(Emergency.phoneNo);
-		txtEmail.setText(Emergency.emailAddress);
-		txtMessage.setText(Emergency.message);
+		txtPhoneNo.setText(emergency.phoneNo);
+		txtEmail.setText(emergency.emailAddress);
+		txtMessage.setText(emergency.message);
 	}
 
-	public void updateTextEdits() {
+	public void saveTextEdits() {
 		EditText txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
 		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
-		Emergency.phoneNo = txtPhoneNo.getText().toString();
-		Emergency.emailAddress = txtEmail.getText().toString();
-		Emergency.message = txtMessage.getText().toString();
+		emergency.phoneNo = txtPhoneNo.getText().toString();
+		emergency.emailAddress = txtEmail.getText().toString();
+		emergency.message = txtMessage.getText().toString();
 		
-		Emergency.save(this);
+		emergency.save(this);
 	}
 
 	public void redButtonPressed() {
-		this.updateTextEdits();
+		this.saveTextEdits();
 
 		// TODO: maybe this is null?
-		if ((Emergency.phoneNo.length() == 0) && (Emergency.emailAddress.length() == 0)) {
+		if ((this.emergency.phoneNo.length() == 0) && (this.emergency.emailAddress.length() == 0)) {
 			Toast.makeText(this, "Enter a phone number or email.",
 					Toast.LENGTH_SHORT).show();
 			return;

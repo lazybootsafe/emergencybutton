@@ -20,7 +20,11 @@ public class Locator {
         void onBetterLocation(Location location);
     }
     
-	// context - can be an activity or any other context
+    /////
+    // Locator
+    //
+    // remember to call locator.unregister() when you're done.
+    //
     public Locator(final Context context, final BetterLocationListener bll) {
 		if (Locator.locationManager != null) {
 			Log.e("Locator", "registered twice!");
@@ -72,15 +76,6 @@ public class Locator {
 				LocationManager.GPS_PROVIDER, 0, 0, locationListener);    	
     }
     
-	public void unregister() {
-		if (locationManager == null) {
-			return;
-		}
-		
-		Locator.locationManager.removeUpdates(Locator.locationListener);
-		Locator.locationManager = null;
-	}
-
 	/**
 	 * Determines whether one Location reading is better than the current
 	 * Location fix
@@ -146,4 +141,20 @@ public class Locator {
 		}
 		return provider1.equals(provider2);
 	}
+	
+	public void unregister() {
+		if (Locator.locationManager == null) {
+			return;
+		}
+		
+		Locator.locationManager.removeUpdates(Locator.locationListener);
+		Locator.locationManager = null;
+	}
+	
+	protected void finalize() throws Throwable
+	{
+		super.finalize();
+		
+		unregister(); 
+	}	
 }
