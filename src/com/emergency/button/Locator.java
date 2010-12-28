@@ -13,8 +13,8 @@ public class Locator {
 	private static final int TWO_MINUTES = 1000 * 60 * 2;
 	public static Location location = null;
 	
-	private static LocationManager locationManager = null;
-	private static LocationListener locationListener;
+	private LocationManager locationManager = null;
+	private LocationListener locationListener;
 	
     public interface BetterLocationListener {
         void onBetterLocation(Location location);
@@ -26,13 +26,13 @@ public class Locator {
     // remember to call locator.unregister() when you're done.
     //
     public Locator(final Context context, final BetterLocationListener bll) {
-		if (Locator.locationManager != null) {
+		if (this.locationManager != null) {
 			Log.e("Locator", "registered twice!");
 			return;
 		}
 		
 		// Acquire a reference to the system Location Manager
-		Locator.locationManager = (LocationManager) context
+		this.locationManager = (LocationManager) context
 				.getSystemService(Context.LOCATION_SERVICE);
 
 		//Toast.makeText(act.getBaseContext(), "Locator register", Toast.LENGTH_SHORT).show();
@@ -143,12 +143,12 @@ public class Locator {
 	}
 	
 	public void unregister() {
-		if (Locator.locationManager == null) {
+		if (this.locationManager == null) {
 			return;
 		}
 		
-		Locator.locationManager.removeUpdates(Locator.locationListener);
-		Locator.locationManager = null;
+		this.locationManager.removeUpdates(this.locationListener);
+		this.locationManager = null;
 	}
 	
 	protected void finalize() throws Throwable

@@ -11,7 +11,7 @@ import android.view.View;
 public class EmergencyButton extends Activity {
 	static final int EMERGENCY_DIALOG = 0;
 
-	Emergency emergency;
+	EmergencyData emergency;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -48,7 +48,6 @@ public class EmergencyButton extends Activity {
 		super.onPause();
 
 		this.saveTextEdits();
-		//this.finish();
 	}
 	
 	@Override
@@ -61,7 +60,7 @@ public class EmergencyButton extends Activity {
 		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
-		this.emergency = new Emergency(this);
+		this.emergency = new EmergencyData(this);
 		
 		txtPhoneNo.setText(emergency.phoneNo);
 		txtEmail.setText(emergency.emailAddress);

@@ -4,14 +4,14 @@ package com.emergency.button;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-public class Emergency {
+public class EmergencyData {
 	String phoneNo;
 	String emailAddress;
 	String message;
 
 	public static final String PREFS_NAME = "EmergencyPrefsFile";
 
-	public Emergency(Context context) {
+	public EmergencyData(Context context) {
 		// Restore preferences
 		SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		this.emailAddress = settings.getString("emailAddress", "");

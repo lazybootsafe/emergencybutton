@@ -13,6 +13,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class EmergencyActivity extends Activity {
@@ -22,6 +23,18 @@ public class EmergencyActivity extends Activity {
 	
 	public long buttonPressedTime = 0;
 	public long messageSentTime = 0;
+	
+	private final static int STATE_X_OR_V = 0;
+	private final static int STATE_V = 1;
+	private final static int STATE_X = 2;
+	
+	String locationString = "";
+	String smsString = "";
+	String emailString = "";
+	
+	int locationState = STATE_X_OR_V;
+	int smsState = STATE_X_OR_V;
+	int emailState = STATE_X_OR_V;
 	
 	// Called when the activity is first created.
 	@Override
@@ -46,9 +59,46 @@ public class EmergencyActivity extends Activity {
 			}
 		});
 
-		this.setLocationState("Waiting For Location");
-		this.setEmailState("...");
-		this.setSMSState("...");
+		this.resetState();
+		updateGUI();
+	}
+	
+	private void updateTextField(int id, String text) {
+		TextView txt = (TextView)findViewById(id);
+		txt.setText(text);
+	}
+	
+	private void updateXV(int id, int state) {
+		ImageView img = (ImageView)findViewById(id);
+		switch (state) {
+		case STATE_X:
+			img.setImageResource(R.drawable.x);
+			break;
+		case STATE_V:
+			img.setImageResource(R.drawable.v);
+			break;
+		case STATE_X_OR_V:
+			img.setImageResource(R.drawable.x_or_v);
+			break;
+			
+		}
+	}
+	
+	protected void updateGUI() {
+		updateTextField(R.id.txtLocation, this.locationString);
+		updateTextField(R.id.txtSMS, this.smsString);
+		updateTextField(R.id.txtEmail, this.emailString);
+		
+		// TODO: rename these variables for consistency
+		updateXV(R.id.imgLocation, this.locationState);
+		updateXV(R.id.imgSMS, this.smsState);
+		updateXV(R.id.imgEmail, this.emailState);
+	}
+	
+	protected void resetState() {
+		this.locationString = "Waiting For Location";
+		this.smsString = "...";
+		this.emailString = "...";
 	}
 	
 	@Override
@@ -62,21 +112,24 @@ public class EmergencyActivity extends Activity {
 		super.onPause();
 		
 	}
-
-	protected void setLocationState(String state) {
-		TextView txt = (TextView)findViewById(R.id.txtLocation);
-		txt.setText(state);			
+	
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		// Restore UI state from the savedInstanceState.
+		// This bundle has also been passed to onCreate.
+		boolean myBoolean = savedInstanceState.getBoolean("MyBoolean");
+		double myDouble = savedInstanceState.getDouble("myDouble");
+		int myInt = savedInstanceState.getInt("MyInt");
+		String myString = savedInstanceState.getString("MyString");
 	}
 
-	protected void setSMSState(String state) {
-		TextView txt = (TextView)findViewById(R.id.txtSMS);
-		txt.setText(state);
-	}
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		// Save UI state changes to the savedInstanceState.
 
-	protected void setEmailState(String state) {
-		TextView txt = (TextView)findViewById(R.id.txtEmail);
-		txt.setText(state);
-	}
+		super.onSaveInstanceState(savedInstanceState);
+	}	
 
 	public void emergencyNow() {
 		Log.v("Emergency", "emergencyNow");
@@ -104,7 +157,9 @@ public class EmergencyActivity extends Activity {
 	private class EmergencyLocator implements Locator.BetterLocationListener {
 		public void onBetterLocation(Location location) {
 			Log.v("Emergency", "got a location");
-			EmergencyActivity.this.setLocationState("Location found");
+			EmergencyActivity.this.locationString = "Location found";
+			EmergencyActivity.this.locationState = STATE_V;
+			EmergencyActivity.this.updateGUI();
 			EmergencyActivity.this.location = location;
 
 			// messageSentTime is either 0 or the last time a
@@ -142,7 +197,7 @@ public class EmergencyActivity extends Activity {
 		public void run() {
 			final Context context = EmergencyActivity.this;
 			// make sure all the fields are fresh and not null
-			Emergency emergency = new Emergency(context);
+			EmergencyData emergency = new EmergencyData(context);
 
 			
 			// mResults = doSomethingExpensive();
@@ -159,47 +214,67 @@ public class EmergencyActivity extends Activity {
 			String emailMessage = emergency.message + "\n" + mapsUrl;
 
 			if (emergency.phoneNo.length() > 0) {
-				this.setSMSState("sending sms");
+				this.setSMSState("Sending sms");
 				// SMSSender.sendSMS(EmergencyButton.this, phoneNo,
 				// message);
 				SMSListener smsListener = new SMSListener() {
 					public void onStatusUpdate(int resultCode,
 							String resultString) {
-						EmergencyThread.this.setSMSState(resultString);
+						
+						EmergencyActivity.this.smsString = resultString;
+						if (resultCode != Activity.RESULT_OK) {
+							EmergencyActivity.this.smsState = STATE_X;
+						}
+						if (resultString.equals("SMS delivered")) {
+							EmergencyActivity.this.smsState = STATE_V;
+						}
+						sendUpdateGui();
 					}
 				};
 				SMSSender.safeSendSMS(context, emergency.phoneNo, textMessage,
 						smsListener);
 			} else {
 				this.setSMSState("No phone number configured, not sending SMS.");
+				EmergencyActivity.this.smsState = STATE_X;
 			}
-
-			// TODO: maybe this is null?
+			sendUpdateGui();
+			
+			
 			if (emergency.emailAddress.length() > 0) {
 				this.setEmailState("Sending email");
+				sendUpdateGui();
 				
 				boolean success = EmailSender.send(emergency.emailAddress,
 						emailMessage);
 				if (success) {
 					setEmailState("Email sent");
+					EmergencyActivity.this.emailState = STATE_V;
 				} else {
-					// Toast.makeText(context, "Failed sending email",
-					// Toast.LENGTH_SHORT).show();
 					setEmailState("Failed sending email");
+					EmergencyActivity.this.emailState = STATE_X;
 				}
 			} else {
 				this.setEmailState("No email configured, not sending email.");
+				EmergencyActivity.this.emailState = STATE_X;
 			}
+			
+			sendUpdateGui();
+		}
+		
+		protected void sendUpdateGui() {
+			sendToHandler(0, "");
 		}
 		
 		protected void setSMSState(String state) {
 			//TextView txt = (TextView)findViewById(R.id.txtSMS);
 			//txt.setText(state);
-			sendToHandler(R.id.txtSMS, state);
+			//sendToHandler(R.id.txtSMS, state);
+			EmergencyActivity.this.smsString = state;
 		}
 
 		protected void setEmailState(String state) {
-			sendToHandler(R.id.txtEmail, state);
+			//sendToHandler(R.id.txtEmail, state);
+			EmergencyActivity.this.emailString = state;
 		}
 		
 		protected void sendToHandler(int fieldId, String state) {
@@ -217,6 +292,10 @@ public class EmergencyActivity extends Activity {
 		public void handleMessage(Message msg) {
 			String state = msg.getData().getString("state");
 			int fieldId = msg.getData().getInt("fieldId");
+			if (state.equals("") && (fieldId == 0)) {
+				EmergencyActivity.this.updateGUI();
+				return;
+			}
 			TextView txt = (TextView) findViewById(fieldId);
 			txt.setText(state);
 		}
