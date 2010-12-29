@@ -17,7 +17,7 @@ public class Locator {
 	private LocationListener locationListener;
 	
     public interface BetterLocationListener {
-        void onBetterLocation(Location location);
+        void onGoodLocation(Location location);
     }
     
     /////
@@ -51,7 +51,7 @@ public class Locator {
 				// makeUseOfNewLocation(location);
 				if (Locator.isBetterLocation(location, Locator.location)) {
 					Locator.location = location;
-					bll.onBetterLocation(Locator.location);
+					bll.onGoodLocation(Locator.location);
 				}
 
 				//Toast.makeText(act.getBaseContext(), "New location: " + Locator.location.toString(), Toast.LENGTH_SHORT).show();

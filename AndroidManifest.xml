@@ -2,12 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.emergency.button"
       android:versionCode="2"
-      android:versionName="1.01">
+      android:versionName="1.01"
+      android:installLocation="auto"
+      >
     <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name=".EmergencyButton"
                   android:label="@string/app_name"
-                  android:theme="@style/Theme.Translucent"
+                  android:theme="@style/Theme.Main"
                   android:launchMode="singleInstance"
+                  android:windowNoTitle="true"
                   >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,8 +19,8 @@
         </activity>
 
         <activity android:name=".EmergencyActivity"
-                  android:label="SendEmergency"
-                  android:theme="@style/Theme.Translucent"
+                  android:label="@string/sending_name"
+                  android:theme="@style/Theme.EmergencyActivity"
                   android:launchMode="singleInstance"
                   >
         </activity>

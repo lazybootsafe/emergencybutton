@@ -1,5 +1,7 @@
 package com.emergency.button;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.emergency.button.SMSSender.SMSListener;
 
 import android.app.Activity;
@@ -12,9 +14,11 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class EmergencyActivity extends Activity {
 
@@ -27,6 +31,8 @@ public class EmergencyActivity extends Activity {
 	private final static int STATE_X_OR_V = 0;
 	private final static int STATE_V = 1;
 	private final static int STATE_X = 2;
+	
+	private AtomicBoolean isSending = new AtomicBoolean(false);
 	
 	String locationString = "";
 	String smsString = "";
@@ -41,9 +47,14 @@ public class EmergencyActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		
-		setContentView(R.layout.emergency_activity_layout);
+        // Request progress bar
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        //setContentView(R.layout.progressbar_4);
+        
+        setContentView(R.layout.emergency_activity_layout);
 
+        
+        
 		Button btnOk = (Button) findViewById(R.id.btnOkDone);
 		btnOk.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -80,37 +91,53 @@ public class EmergencyActivity extends Activity {
 		case STATE_X_OR_V:
 			img.setImageResource(R.drawable.x_or_v);
 			break;
-			
 		}
 	}
 	
 	protected void updateGUI() {
-		updateTextField(R.id.txtLocation, this.locationString);
-		updateTextField(R.id.txtSMS, this.smsString);
-		updateTextField(R.id.txtEmail, this.emailString);
-		
-		// TODO: rename these variables for consistency
-		updateXV(R.id.imgLocation, this.locationState);
-		updateXV(R.id.imgSMS, this.smsState);
-		updateXV(R.id.imgEmail, this.emailState);
+		runOnUiThread(new Runnable() {
+		    public void run() {
+				EmergencyActivity emthis = EmergencyActivity.this;
+		    	updateTextField(R.id.txtLocation, emthis.locationString);
+				updateTextField(R.id.txtSMS, emthis.smsString);
+				updateTextField(R.id.txtEmail, emthis.emailString);
+				
+				// TODO: rename these variables for consistency
+				updateXV(R.id.imgLocation, emthis.locationState);
+				updateXV(R.id.imgSMS, emthis.smsState);
+				updateXV(R.id.imgEmail, emthis.emailState);
+
+				emthis.setProgressBarIndeterminateVisibility( emthis.isSending.get());
+		    }
+		});
 	}
 	
 	protected void resetState() {
 		this.locationString = "Waiting For Location";
+		this.locationState = STATE_X_OR_V;
 		this.smsString = "...";
+		this.smsState = STATE_X_OR_V;
 		this.emailString = "...";
+		this.emailState = STATE_X_OR_V;
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		this.emergencyNow();
+		this.updateGUI();
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		
+	}
+	
+	
+	@Override
+	protected void onDestroy() {
+		Log.v("Emergency", "destroy emergency send activity " + isFinishing());
+		super.onDestroy();
 	}
 	
 	@Override
@@ -127,7 +154,8 @@ public class EmergencyActivity extends Activity {
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		// Save UI state changes to the savedInstanceState.
-
+		savedInstanceState.putBoolean("MyBoolean", true);
+		
 		super.onSaveInstanceState(savedInstanceState);
 	}	
 
@@ -136,26 +164,27 @@ public class EmergencyActivity extends Activity {
 		
 		final Context context = this;
 
-		// TODO: This buttonPressedTime and messageSentTime is a bad way of going
-		// about concurrency. Maybe do this some other way or with a lock?
-
 		// The button was pressed now.
 		this.buttonPressedTime = SystemClock.elapsedRealtime();
 
-		if (this.locator != null) {
-			// no need to reinitialize the locator, note there's a race
-			// condition here
-			// TODO: lock or not?
-			return;
-		}
-
 		// TODO: maybe still send the distress signal after a while without a
 		// location?
-		this.locator = new Locator(context,	new EmergencyLocator());
+		if (this.isSending.compareAndSet(false, true)) {
+			// got the lock, send out the message!
+			EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
+			this.resetState();
+			if (this.locator != null) {
+				Log.e("EmergencyActivity", "locator exists while lock is open");
+			}
+			this.locator = new Locator(context,	new EmergencyLocator());
+		} else {
+			Toast.makeText(this, "Already sending a message.",
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 	
 	private class EmergencyLocator implements Locator.BetterLocationListener {
-		public void onBetterLocation(Location location) {
+		public void onGoodLocation(Location location) {
 			Log.v("Emergency", "got a location");
 			EmergencyActivity.this.locationString = "Location found";
 			EmergencyActivity.this.locationState = STATE_V;
@@ -166,19 +195,17 @@ public class EmergencyActivity extends Activity {
 			// message was sent.
 			// so if the button was pressed more recently, fire a
 			// message.
-			if (EmergencyActivity.this.messageSentTime < EmergencyActivity.this.buttonPressedTime) {
-				try {
-					EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
-					EmergencyActivity.this.sendMessages();
-					EmergencyActivity.this.locator.unregister();
-				} finally {
-					EmergencyActivity.this.locator = null;
-				}
+			try {
+				EmergencyActivity.this.startMessagesThread();
+				EmergencyActivity.this.locator.unregister();
+			} finally {
+				EmergencyActivity.this.locator = null;
+				// let the messages thread do this: EmergencyActivity.this.isSending.set(false);
 			}
 		}
 	}
 	
-	private void sendMessages() {
+	private void startMessagesThread() {
 
 		// these operations are going to block a bit so run them on another
 		// thread that won't interfere with the GUI. That way the user
@@ -195,6 +222,73 @@ public class EmergencyActivity extends Activity {
 		}
 		
 		public void run() {
+			try {
+				this.sendMessages();
+			} finally {
+				EmergencyActivity.this.isSending.set(false);
+				//sendUpdateGui();
+				updateGUI();
+			}
+		}
+		
+		private void sendSMS(Context context, String phoneNo, String textMessage) {
+			if (phoneNo.length() > 0) {
+				this.setSMSState("Sending sms");
+				// SMSSender.sendSMS(EmergencyButton.this, phoneNo,
+				// message);
+				SMSListener smsListener = new SMSListener() {
+					public void onStatusUpdate(int resultCode,
+							String resultString) {
+						
+						EmergencyActivity.this.smsString = resultString;
+						if (resultCode != Activity.RESULT_OK) {
+							EmergencyActivity.this.smsState = STATE_X;
+						}
+						if (resultString.equals("SMS delivered")) {
+							EmergencyActivity.this.smsState = STATE_V;
+						}
+						//sendUpdateGui();
+						updateGUI();
+					}
+				};
+				SMSSender.safeSendSMS(context, phoneNo, textMessage,
+						smsListener);
+			} else {
+				this.setSMSState("No phone number configured, not sending SMS.");
+				EmergencyActivity.this.smsState = STATE_X;
+			}
+			//sendUpdateGui();
+			updateGUI();
+			
+		}
+		
+		private void sendEmail(String emailAddress, String emailMessage) {
+			if (emailAddress.length() > 0) {
+				this.setEmailState("Sending email");
+				//sendUpdateGui();
+				updateGUI();
+				
+				boolean success = EmailSender.send(emailAddress,
+						emailMessage);
+				if (success) {
+					setEmailState("Email sent");
+					EmergencyActivity.this.emailState = STATE_V;
+				} else {
+					setEmailState("Failed sending email");
+					EmergencyActivity.this.emailState = STATE_X;
+				}
+			} else {
+				this.setEmailState("No email configured, not sending email.");
+				EmergencyActivity.this.emailState = STATE_X;
+			}
+			
+			//sendUpdateGui();
+			updateGUI();
+			
+		}
+		
+		private void sendMessages() {
+			
 			final Context context = EmergencyActivity.this;
 			// make sure all the fields are fresh and not null
 			EmergencyData emergency = new EmergencyData(context);
@@ -213,52 +307,8 @@ public class EmergencyActivity extends Activity {
 			String mapsUrl = "http://maps.google.com/maps?q=" + locString;
 			String emailMessage = emergency.message + "\n" + mapsUrl;
 
-			if (emergency.phoneNo.length() > 0) {
-				this.setSMSState("Sending sms");
-				// SMSSender.sendSMS(EmergencyButton.this, phoneNo,
-				// message);
-				SMSListener smsListener = new SMSListener() {
-					public void onStatusUpdate(int resultCode,
-							String resultString) {
-						
-						EmergencyActivity.this.smsString = resultString;
-						if (resultCode != Activity.RESULT_OK) {
-							EmergencyActivity.this.smsState = STATE_X;
-						}
-						if (resultString.equals("SMS delivered")) {
-							EmergencyActivity.this.smsState = STATE_V;
-						}
-						sendUpdateGui();
-					}
-				};
-				SMSSender.safeSendSMS(context, emergency.phoneNo, textMessage,
-						smsListener);
-			} else {
-				this.setSMSState("No phone number configured, not sending SMS.");
-				EmergencyActivity.this.smsState = STATE_X;
-			}
-			sendUpdateGui();
-			
-			
-			if (emergency.emailAddress.length() > 0) {
-				this.setEmailState("Sending email");
-				sendUpdateGui();
-				
-				boolean success = EmailSender.send(emergency.emailAddress,
-						emailMessage);
-				if (success) {
-					setEmailState("Email sent");
-					EmergencyActivity.this.emailState = STATE_V;
-				} else {
-					setEmailState("Failed sending email");
-					EmergencyActivity.this.emailState = STATE_X;
-				}
-			} else {
-				this.setEmailState("No email configured, not sending email.");
-				EmergencyActivity.this.emailState = STATE_X;
-			}
-			
-			sendUpdateGui();
+			this.sendSMS(context, emergency.phoneNo, textMessage);
+			this.sendEmail(emergency.emailAddress, emailMessage);
 		}
 		
 		protected void sendUpdateGui() {
