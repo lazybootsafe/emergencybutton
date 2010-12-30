@@ -70,13 +70,9 @@ public class EmergencyWidgetProvider extends AppWidgetProvider {
 		if ((pressLimit < EmergencyWidgetProvider.button_clicked_time_1) && 
 			(pressLimit < EmergencyWidgetProvider.button_clicked_time_2)) {
 			
-			//new Emergency().emDialog(context).show();
+			EmergencyActivity.armEmergencyActivity(context);
+			
 			Intent myIntent = new Intent(context, EmergencyActivity.class);
-			//Intent myIntent = new Intent();
-			//myIntent.setClassName("com.emergency.button", "com.emergency.button.EmergencyActivity");
-			//--Intent myIntent = new Intent(Service.createPackageContext("com.emergency.button", 0), EmergencyActivity.class);
-			//Intent myIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "testemail@gmail.com", null));
-			//Intent myIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("sms", "987654321", null));
 			
 			// FLAG_ACTIVITY_NEW_TASK is needed because we're not in an activity
 			// already, without it we crash.

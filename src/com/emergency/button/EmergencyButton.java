@@ -62,9 +62,9 @@ public class EmergencyButton extends Activity {
 
 		this.emergency = new EmergencyData(this);
 		
-		txtPhoneNo.setText(emergency.phoneNo);
-		txtEmail.setText(emergency.emailAddress);
-		txtMessage.setText(emergency.message);
+		txtPhoneNo.setText(emergency.getPhone());
+		txtEmail.setText(emergency.getEmail());
+		txtMessage.setText(emergency.getMessage());
 	}
 
 	public void saveTextEdits() {
@@ -72,25 +72,22 @@ public class EmergencyButton extends Activity {
 		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
-		emergency.phoneNo = txtPhoneNo.getText().toString();
-		emergency.emailAddress = txtEmail.getText().toString();
-		emergency.message = txtMessage.getText().toString();
-		
-		emergency.save(this);
+		emergency.setPhone(txtPhoneNo.getText().toString());
+		emergency.setEmail(txtEmail.getText().toString());
+		emergency.setMessage(txtMessage.getText().toString());
 	}
 
 	public void redButtonPressed() {
 		this.saveTextEdits();
 
 		// TODO: maybe this is null?
-		if ((this.emergency.phoneNo.length() == 0) && (this.emergency.emailAddress.length() == 0)) {
+		if ((this.emergency.getPhone().length() == 0) && (this.emergency.getEmail().length() == 0)) {
 			Toast.makeText(this, "Enter a phone number or email.",
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		
-		//Emergency.emergencyNow(this);
-		//ProgressDialog dialog = ProgressDialog.show(this, "Sending Emergency Message", "Loading. Please wait...", true);
+		EmergencyActivity.armEmergencyActivity(this);
 		Intent myIntent = new Intent(EmergencyButton.this, EmergencyActivity.class);
 		EmergencyButton.this.startActivity(myIntent);
 	}

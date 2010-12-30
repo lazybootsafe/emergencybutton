@@ -21,7 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class EmergencyActivity extends Activity {
-
+	
 	Location location = null;
 	Locator locator = null;
 	
@@ -121,10 +121,21 @@ public class EmergencyActivity extends Activity {
 		this.emailState = STATE_X_OR_V;
 	}
 	
+	public static void armEmergencyActivity(Context context) {
+		EmergencyData emer = new EmergencyData(context);
+		emer.setArmEmergency(true);
+	}
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		this.emergencyNow();
+		EmergencyData emer = new EmergencyData(this);
+		if(emer.getArmEmergency()) {
+			emer.setArmEmergency(false);
+			this.emergencyNow();
+		} else {
+			Log.v("Emergency", "emergency resumed but unarmed.");
+		}
 		this.updateGUI();
 	}
 	
@@ -159,7 +170,7 @@ public class EmergencyActivity extends Activity {
 		super.onSaveInstanceState(savedInstanceState);
 	}	
 
-	public void emergencyNow() {
+	private void emergencyNow() {
 		Log.v("Emergency", "emergencyNow");
 		
 		final Context context = this;
@@ -303,12 +314,12 @@ public class EmergencyActivity extends Activity {
 					+ ","
 					+ Double.toString(EmergencyActivity.this.location.getLongitude());
 			
-			String textMessage = emergency.message + " " + locString;
+			String textMessage = emergency.getMessage() + " " + locString;
 			String mapsUrl = "http://maps.google.com/maps?q=" + locString;
-			String emailMessage = emergency.message + "\n" + mapsUrl;
+			String emailMessage = emergency.getMessage() + "\n" + mapsUrl;
 
-			this.sendSMS(context, emergency.phoneNo, textMessage);
-			this.sendEmail(emergency.emailAddress, emailMessage);
+			this.sendSMS(context, emergency.getPhone(), textMessage);
+			this.sendEmail(emergency.getEmail(), emailMessage);
 		}
 		
 		protected void sendUpdateGui() {
