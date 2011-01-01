@@ -1,17 +1,23 @@
 package com.emergency.button;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.emergency.button.SMSSender.SMSListener;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -70,7 +76,7 @@ public class EmergencyActivity extends Activity {
 			}
 		});
 
-		this.resetState();
+		this.resetUIState();
 		updateGUI();
 	}
 	
@@ -112,7 +118,7 @@ public class EmergencyActivity extends Activity {
 		});
 	}
 	
-	protected void resetState() {
+	protected void resetUIState() {
 		this.locationString = "Waiting For Location";
 		this.locationState = STATE_X_OR_V;
 		this.smsString = "...";
@@ -150,31 +156,11 @@ public class EmergencyActivity extends Activity {
 		Log.v("Emergency", "destroy emergency send activity " + isFinishing());
 		super.onDestroy();
 	}
-	
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		// Restore UI state from the savedInstanceState.
-		// This bundle has also been passed to onCreate.
-		boolean myBoolean = savedInstanceState.getBoolean("MyBoolean");
-		double myDouble = savedInstanceState.getDouble("myDouble");
-		int myInt = savedInstanceState.getInt("MyInt");
-		String myString = savedInstanceState.getString("MyString");
-	}
 
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		// Save UI state changes to the savedInstanceState.
-		savedInstanceState.putBoolean("MyBoolean", true);
-		
-		super.onSaveInstanceState(savedInstanceState);
-	}	
 
 	private void emergencyNow() {
 		Log.v("Emergency", "emergencyNow");
 		
-		final Context context = this;
-
 		// The button was pressed now.
 		this.buttonPressedTime = SystemClock.elapsedRealtime();
 
@@ -182,23 +168,73 @@ public class EmergencyActivity extends Activity {
 		// location?
 		if (this.isSending.compareAndSet(false, true)) {
 			// got the lock, send out the message!
-			EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
-			this.resetState();
-			if (this.locator != null) {
-				Log.e("EmergencyActivity", "locator exists while lock is open");
-			}
-			this.locator = new Locator(context,	new EmergencyLocator());
+			startDistressSignal();
 		} else {
 			Toast.makeText(this, "Already sending a message.",
 					Toast.LENGTH_SHORT).show();
 		}
 	}
 	
+	private void startDistressSignal() {
+		final Context context = this;
+		EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
+		this.resetUIState();
+		
+		requestGPS();
+		
+		if (this.locator != null) {
+			Log.e("EmergencyActivity", "locator exists while lock is open");
+		}
+		this.locator = new Locator(context,	new EmergencyLocator());
+		
+	}
+
+	private void requestGPS() {
+		final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			buildAlertMessageNoGps();
+		}
+	}
+
+	private void buildAlertMessageNoGps() {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(
+				"Yout GPS seems to be disabled, do you want to enable it?")
+				.setCancelable(false)
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(
+									final DialogInterface dialog,
+									final int id) {
+								showGpsOptions();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(final DialogInterface dialog,
+							final int id) {
+						dialog.cancel();
+					}
+				});
+		final AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+	private void showGpsOptions() {
+		Intent gpsOptionsIntent = new Intent(
+				android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+		startActivity(gpsOptionsIntent);
+	}
+
 	private class EmergencyLocator implements Locator.BetterLocationListener {
 		public void onGoodLocation(Location location) {
 			Log.v("Emergency", "got a location");
-			EmergencyActivity.this.locationString = "Location found";
-			EmergencyActivity.this.locationState = STATE_V;
+			if (location != null) {
+				EmergencyActivity.this.locationString = "Location found";
+				EmergencyActivity.this.locationState = STATE_V;
+			} else {
+				EmergencyActivity.this.locationString = "No location info, sending anyway.";
+				EmergencyActivity.this.locationState = STATE_X;
+			}
 			EmergencyActivity.this.updateGUI();
 			EmergencyActivity.this.location = location;
 
@@ -208,7 +244,7 @@ public class EmergencyActivity extends Activity {
 			// message.
 			try {
 				EmergencyActivity.this.startMessagesThread();
-				EmergencyActivity.this.locator.unregister();
+				//EmergencyActivity.this.locator.unregister();
 			} finally {
 				EmergencyActivity.this.locator = null;
 				// let the messages thread do this: EmergencyActivity.this.isSending.set(false);
@@ -221,16 +257,11 @@ public class EmergencyActivity extends Activity {
 		// these operations are going to block a bit so run them on another
 		// thread that won't interfere with the GUI. That way the user
 		// can see the toasts. (this was a really hard bug to find btw)
-		Thread t = new EmergencyThread(this.handler);
+		Thread t = new EmergencyThread();
 		t.start();
 	}
 
 	private class EmergencyThread extends Thread {
-		Handler handler;
-		
-		EmergencyThread(Handler handler) {
-			EmergencyThread.this.handler = handler;
-		}
 		
 		public void run() {
 			try {
@@ -298,6 +329,44 @@ public class EmergencyActivity extends Activity {
 			
 		}
 		
+		private String mapsUrl(Location location) {
+			String locString = Double
+			.toString(location.getLatitude())
+			+ ","
+			+ Double.toString(location.getLongitude());
+	
+			String mapsUrl = "http://maps.google.com/maps?q=" + locString;
+			return mapsUrl;
+		}
+		
+		private String datetimeformat(long time) {
+			Date date = new Date(time);
+			java.text.DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+			java.text.DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
+			return timeFormat.format(date) + " " + dateFormat.format(date);
+		}
+		
+		private String isotime(long time) {
+			Date date = new Date(time);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			return sdf.format(date);
+		}
+		
+		private String locationDescription(Location location) {
+			String desc =  mapsUrl(location);
+			desc += "\n"; 
+			desc += "\n" + "Location provider: " + location.getProvider();
+			desc += "\n" + "Location timestamp (UTC): " + isotime(location.getTime());
+			if (location.hasAltitude()) {
+				desc += "\n" + "Altitude: " + location.getAltitude();
+			}
+			if (location.hasAccuracy()) {
+				desc += "\n" + "Accuracy: " + location.getAccuracy();
+			}
+			
+			return desc;
+		}
+		
 		private void sendMessages() {
 			
 			final Context context = EmergencyActivity.this;
@@ -308,22 +377,18 @@ public class EmergencyActivity extends Activity {
 			// mResults = doSomethingExpensive();
 			// mHandler.post(mUpdateResults);
 			// Do it, send all the stuff!
-
-			String locString = Double
-					.toString(EmergencyActivity.this.location.getLatitude())
-					+ ","
-					+ Double.toString(EmergencyActivity.this.location.getLongitude());
+			String textMessage = emergency.getMessage();
+			String emailMessage = emergency.getMessage();
+			if (location != null) {
+				textMessage += "\n" + mapsUrl(EmergencyActivity.this.location);
+				emailMessage += "\n" + locationDescription(EmergencyActivity.this.location);
+			} else {
+				textMessage += "\nNo location info.";
+				emailMessage += "\nNo location info.";
+			}
 			
-			String textMessage = emergency.getMessage() + " " + locString;
-			String mapsUrl = "http://maps.google.com/maps?q=" + locString;
-			String emailMessage = emergency.getMessage() + "\n" + mapsUrl;
-
 			this.sendSMS(context, emergency.getPhone(), textMessage);
 			this.sendEmail(emergency.getEmail(), emailMessage);
-		}
-		
-		protected void sendUpdateGui() {
-			sendToHandler(0, "");
 		}
 		
 		protected void setSMSState(String state) {
@@ -338,14 +403,6 @@ public class EmergencyActivity extends Activity {
 			EmergencyActivity.this.emailString = state;
 		}
 		
-		protected void sendToHandler(int fieldId, String state) {
-			Message msg = this.handler.obtainMessage();
-	        Bundle b = new Bundle();
-	        b.putInt("fieldId", fieldId);
-	        b.putString("state", state);
-	        msg.setData(b);
-	        this.handler.sendMessage(msg);
-		}		
 	}
 	
 	// Define the Handler that receives messages from the thread and update the progress
