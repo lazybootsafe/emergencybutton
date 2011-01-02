@@ -8,12 +8,27 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
 	    >
-	    
-	    <TextView  
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content" 
-	        android:text="Press this button in case of emergency"
-	        />
+		<LinearLayout 
+		    android:orientation="horizontal"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    >	    
+		    <TextView  
+		        android:layout_width="wrap_content" 
+		        android:layout_height="wrap_content" 
+		        android:layout_weight="1"
+		        android:text="Press this button in case of emergency"
+		        
+		        />
+			<ImageButton
+			    android:id="@+id/btnHelp"
+			    android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+			    android:background="@drawable/question_small"
+			    android:layout_gravity="right"
+			    />
+		</LinearLayout>
+		        
 		<ImageButton
 		    android:id="@+id/btnEmergency"
 		    android:layout_width="wrap_content"

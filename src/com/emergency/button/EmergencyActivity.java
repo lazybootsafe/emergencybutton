@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -244,7 +243,6 @@ public class EmergencyActivity extends Activity {
 			// message.
 			try {
 				EmergencyActivity.this.startMessagesThread();
-				//EmergencyActivity.this.locator.unregister();
 			} finally {
 				EmergencyActivity.this.locator = null;
 				// let the messages thread do this: EmergencyActivity.this.isSending.set(false);
@@ -339,13 +337,7 @@ public class EmergencyActivity extends Activity {
 			return mapsUrl;
 		}
 		
-		private String datetimeformat(long time) {
-			Date date = new Date(time);
-			java.text.DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-			java.text.DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(getApplicationContext());
-			return timeFormat.format(date) + " " + dateFormat.format(date);
-		}
-		
+
 		private String isotime(long time) {
 			Date date = new Date(time);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -377,8 +369,12 @@ public class EmergencyActivity extends Activity {
 			// mResults = doSomethingExpensive();
 			// mHandler.post(mUpdateResults);
 			// Do it, send all the stuff!
-			String textMessage = emergency.getMessage();
-			String emailMessage = emergency.getMessage();
+			String message = emergency.getMessage();
+			if (message.length() == 0) {
+				message = "No emergency message specified.";
+			}
+			String textMessage = message;
+			String emailMessage = message;
 			if (location != null) {
 				textMessage += "\n" + mapsUrl(EmergencyActivity.this.location);
 				emailMessage += "\n" + locationDescription(EmergencyActivity.this.location);

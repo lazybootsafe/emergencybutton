@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Emergency</string>
     <string name="sending_name">Sending Emergency Message</string>
+    <string name="intro_name">Emergency Button Help</string>
     <string name="widget_loading">Widget Loading</string>
     <string name="widget_error">Widget Error</string>
     <string name="widget_message">Widget Message</string>

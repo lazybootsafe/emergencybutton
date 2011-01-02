@@ -67,14 +67,8 @@ public class Locator {
 
 		//Toast.makeText(act.getBaseContext(), "Locator register", Toast.LENGTH_SHORT).show();
 
-		Location lastKnownNetLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		Location lastKnownSatLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (Locator.isBetterLocation(lastKnownSatLocation, lastKnownNetLocation)) {
-			this.location = lastKnownSatLocation;
-		} else {
-			this.location = lastKnownNetLocation;
-		}
-
+		this.location = getBestLastKnownLocation(locationManager);
+		
 		// Define a listener that responds to location updates
 		this.locationListener = new GoodLocationListener();
 
@@ -87,6 +81,34 @@ public class Locator {
 		
 		this.waitForGoodLocationTimer = new Timer();
 		this.waitForGoodLocationTimer.schedule(new GetLastLocation(), MAX_WAITING_TIME_MS);
+    }
+    
+    /**	
+	 Gets the best already known location, if none exists, null is returned.
+	 
+	 @param locationManager
+	            The location manager you're using.
+	            
+	 @return a location or null.
+	*/    
+    public static Location getBestLastKnownLocation(LocationManager locationManager) {
+
+		Location satelliteLoc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		Location networkLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		
+		if (null == networkLoc) {
+			return satelliteLoc;
+		} 
+		if (null == satelliteLoc) {
+			return networkLoc;
+		}
+		
+		// both locations aren't null
+		if (Locator.isBetterLocation(networkLoc, satelliteLoc)) {
+			return networkLoc;
+		} else {
+			return satelliteLoc;
+		}
     }
     
     private class GoodLocationListener implements LocationListener {
@@ -137,7 +159,7 @@ public class Locator {
     
     /**	
 	 Determines whether one Location reading is better than the current
-	 Location fix
+	 Location fix. DON'T PASS NULL AS A PARAMETER.
 	 
 	 @param location
 	            The new Location that you want to evaluate
@@ -149,11 +171,6 @@ public class Locator {
 	*/
 	protected static boolean isBetterLocation(Location location,
 			Location currentBestLocation) {
-		if (currentBestLocation == null) {
-			// A new location is always better than no location
-			return true;
-		}
-
 		// Check whether the new location fix is newer or older
 		long timeDelta = location.getTime() - currentBestLocation.getTime();
 		boolean isSignificantlyNewer = timeDelta > LARGE_LOCATION_AGE_MS;

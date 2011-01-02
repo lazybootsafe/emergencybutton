@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.emergency.button"
-      android:versionCode="2"
-      android:versionName="1.01"
+      android:versionCode="3"
+      android:versionName="1.2"
       android:installLocation="auto"
       >
     <application android:icon="@drawable/icon" android:label="@string/app_name">
@@ -21,6 +21,13 @@
         <activity android:name=".EmergencyActivity"
                   android:label="@string/sending_name"
                   android:theme="@style/Theme.EmergencyActivity"
+                  android:launchMode="singleInstance"
+                  >
+        </activity>
+
+        <activity android:name=".IntroActivity"
+                  android:label="@string/intro_name"
+                  android:theme="@android:style/Theme.Dialog"
                   android:launchMode="singleInstance"
                   >
         </activity>

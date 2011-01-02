@@ -1,9 +1,15 @@
 Emergency Button
 ================
 
-Developers
+Developing
 ---
 ubershmekel
+
+
+Testing
+---
+Yuvalk
+Evyab
 
 
 Assets
@@ -16,6 +22,8 @@ Red Button - Will be replaced - http://irevolution.wordpress.com/2010/05/02/futu
 1293319805_kopetestatusmessage.png - iconfinder.com - http://www.kde-look.org/usermanager/search.php?username=mentalrey  Alessandro Rei
 v and x - iconfinder.com - http://icojoy.com/
 searching_progress.gif - http://flights.beaconsouthamerica.com/
+question_small.png Yusuke Kamiyamane http://p.yusukekamiyamane.com/
+question_small.png by Momenticons http://momentumdesignlab.com/
 
 
 Minds read without asking

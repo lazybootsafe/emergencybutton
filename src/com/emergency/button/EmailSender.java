@@ -17,6 +17,8 @@ import org.apache.http.message.BasicNameValuePair;
 import android.util.Log;
 
 public class EmailSender {
+	private static String LOG_TAG = "EmailSender";
+	
 	public static boolean send(String to, String message)  {
 		return EmailSender.sendWithEmailbyweb(to, message);
 	}
@@ -48,16 +50,17 @@ public class EmailSender {
 	        
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
-			Log.e("EmailSender", e.getMessage(), e);
+			Log.e(LOG_TAG, e.getMessage(), e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			Log.e("EmailSender", e.getMessage(), e);
+			Log.e(LOG_TAG, e.getMessage(), e);
 		}
 		
 		if ("success".equals(responseBody)) {
+			Log.v(LOG_TAG, "Email sent.");
 			return true;
 		} else {
-			Log.e("EmailSender", "Failed sending email: response \"" + responseBody + "\"");
+			Log.e(LOG_TAG, "Failed sending email: response \"" + responseBody + "\"");
 			return false;
 		}
 	}

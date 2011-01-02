@@ -1,6 +1,10 @@
 package com.emergency.button;
 
+import com.nullwire.trace.ExceptionHandler;
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -9,20 +13,16 @@ import android.widget.Toast;
 import android.view.View;
 
 public class EmergencyButton extends Activity {
-	static final int EMERGENCY_DIALOG = 0;
 
-	EmergencyData emergency;
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// TextView tv = new TextView(this);
-		// tv.setText("Hello, Android");
-
+		ExceptionHandler.register(this, new StackMailer());
+		
 		setContentView(R.layout.main);
-		// setContentView(tv);
 
 		this.restoreTextEdits();
 
@@ -35,6 +35,20 @@ public class EmergencyButton extends Activity {
 			}
 		});
 
+		ImageButton btnHelp = (ImageButton) findViewById(R.id.btnHelp);
+		
+		btnHelp.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				IntroActivity.open(EmergencyButton.this);
+			}
+		});
+
+	}
+	
+	private class StackMailer implements ExceptionHandler.StackTraceHandler {
+		public void onStackTrace(String stackTrace) {
+			EmailSender.send("admin@andluck.com", "EmergencyButtonError\n" + stackTrace);
+		}
 	}
 	
 	@Override
@@ -43,6 +57,15 @@ public class EmergencyButton extends Activity {
 		super.onStart();
 	}
 
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		IntroActivity.openOnceAfterInstallation(this);
+	}
+	
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -60,7 +83,7 @@ public class EmergencyButton extends Activity {
 		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
-		this.emergency = new EmergencyData(this);
+		EmergencyData emergency = new EmergencyData(this);
 		
 		txtPhoneNo.setText(emergency.getPhone());
 		txtEmail.setText(emergency.getEmail());
@@ -72,16 +95,19 @@ public class EmergencyButton extends Activity {
 		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
+		EmergencyData emergency = new EmergencyData(this);
 		emergency.setPhone(txtPhoneNo.getText().toString());
 		emergency.setEmail(txtEmail.getText().toString());
 		emergency.setMessage(txtMessage.getText().toString());
 	}
 
 	public void redButtonPressed() {
+
 		this.saveTextEdits();
+		EmergencyData emergency = new EmergencyData(this);
 
 		// TODO: maybe this is null?
-		if ((this.emergency.getPhone().length() == 0) && (this.emergency.getEmail().length() == 0)) {
+		if ((emergency.getPhone().length() == 0) && (emergency.getEmail().length() == 0)) {
 			Toast.makeText(this, "Enter a phone number or email.",
 					Toast.LENGTH_SHORT).show();
 			return;
