@@ -20,10 +20,14 @@ public class EmailSender {
 	private static String LOG_TAG = "EmailSender";
 	
 	public static boolean send(String to, String message)  {
-		return EmailSender.sendWithEmailbyweb(to, message);
+		return EmailSender.sendWithEmailbyweb(to, "Emergency", message);
 	}
 	
-	public static boolean sendWithEmailbyweb(String to, String message) {
+	public static boolean send(String to, String subject, String message) {
+		return EmailSender.sendWithEmailbyweb(to, subject, message);
+	}
+	
+	public static boolean sendWithEmailbyweb(String to, String subject, String message) {
 		
 		String responseBody = "";
 		
@@ -36,7 +40,7 @@ public class EmailSender {
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 			nameValuePairs.add(new BasicNameValuePair("to", to));
 			nameValuePairs.add(new BasicNameValuePair("from", "Emergency Button <EmergencyButtonApp@gmail.com>"));
-			nameValuePairs.add(new BasicNameValuePair("subject", "Emergency"));
+			nameValuePairs.add(new BasicNameValuePair("subject", subject));
 			nameValuePairs.add(new BasicNameValuePair("message", message));
 			nameValuePairs.add(new BasicNameValuePair("secret", Config.secret));
 			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));

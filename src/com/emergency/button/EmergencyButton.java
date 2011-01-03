@@ -3,8 +3,6 @@ package com.emergency.button;
 import com.nullwire.trace.ExceptionHandler;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -47,7 +45,7 @@ public class EmergencyButton extends Activity {
 	
 	private class StackMailer implements ExceptionHandler.StackTraceHandler {
 		public void onStackTrace(String stackTrace) {
-			EmailSender.send("admin@andluck.com", "EmergencyButtonError\n" + stackTrace);
+			EmailSender.send("admin@andluck.com", "EmergencyButtonError", "EmergencyButtonError\n" + stackTrace);
 		}
 	}
 	
@@ -102,7 +100,6 @@ public class EmergencyButton extends Activity {
 	}
 
 	public void redButtonPressed() {
-
 		this.saveTextEdits();
 		EmergencyData emergency = new EmergencyData(this);
 

@@ -353,7 +353,7 @@ public class EmergencyActivity extends Activity {
 				desc += "\n" + "Altitude: " + location.getAltitude();
 			}
 			if (location.hasAccuracy()) {
-				desc += "\n" + "Accuracy: " + location.getAccuracy();
+				desc += "\n" + "Accuracy: " + location.getAccuracy() + " meters";
 			}
 			
 			return desc;

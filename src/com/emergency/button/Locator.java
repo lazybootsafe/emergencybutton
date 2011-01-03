@@ -188,27 +188,48 @@ public class Locator {
 			return false;
 		}
 
-		// Check whether the new location fix is more or less accurate
-		int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation
-				.getAccuracy());
-		boolean isLessAccurate = accuracyDelta > 0;
-		boolean isMoreAccurate = accuracyDelta < 0;
-		boolean isSignificantlyLessAccurate = accuracyDelta > 200;
-
 		// Check if the old and new location are from the same provider
 		boolean isFromSameProvider = isSameProvider(location.getProvider(),
 				currentBestLocation.getProvider());
-
-		// Determine location quality using a combination of timeliness and
-		// accuracy
-		if (isMoreAccurate) {
-			return true;
-		} else if (isNewer && !isLessAccurate) {
-			return true;
-		} else if (isNewer && !isSignificantlyLessAccurate
-				&& isFromSameProvider) {
+		
+		if (location.hasAccuracy() && currentBestLocation.hasAccuracy()) {
+			// Check whether the new location fix is more or less accurate
+			int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation
+					.getAccuracy());
+			boolean isLessAccurate = accuracyDelta > 0;
+			boolean isMoreAccurate = accuracyDelta < 0;
+			boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+	
+	
+			// Determine location quality using a combination of timeliness and
+			// accuracy
+			if (isMoreAccurate) {
+				return true;
+			} else if (isNewer && !isLessAccurate) {
+				return true;
+			} else if (isNewer && !isSignificantlyLessAccurate
+					&& isFromSameProvider) {
+				return true;
+			}
+			return false;
+		}
+		
+		// one or both locations don't have accuracy information
+		
+		// prefer GPS
+		if (location.getProvider().equals(LocationManager.GPS_PROVIDER)) {
 			return true;
 		}
+		
+		// TODO: maybe prefer locations with hasAccuracy() = true?
+		
+		if ( ! currentBestLocation.getProvider().equals(LocationManager.GPS_PROVIDER)) {
+			// the currentBestLocation isn't GPS, so go with the newer
+			if (location.getTime() > currentBestLocation.getTime()) {
+				return true;
+			}
+		}
+		
 		return false;
 	}
 
