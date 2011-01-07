@@ -54,20 +54,20 @@ public class DefaultExceptionHandler implements UncaughtExceptionHandler {
 	}
 	 
 	// Default exception handler
-	public void uncaughtException(Thread t, Throwable e) {
+	public void uncaughtException(Thread thread, Throwable exception) {
 		// Here you should have a more robust, permanent record of problems
 	    final Writer result = new StringWriter();
 	    final PrintWriter printWriter = new PrintWriter(result);
-	    e.printStackTrace(printWriter);
+	    exception.printStackTrace(printWriter);
 	    try {
 	    	// Random number to avoid duplicate files
 	    	Random generator = new Random();
 	    	int random = generator.nextInt(99999);    	
 	    	// Embed version in stacktrace filename
-	    	String filename = G.APP_VERSION+"-"+Integer.toString(random);
-	    	Log.d(TAG, "Writing unhandled exception to: " + G.FILES_PATH+"/"+filename+".stacktrace");
+	    	String filename = G.APP_VERSION + "-" + Integer.toString(random);
+	    	Log.d(TAG, "Writing unhandled exception to: " + G.FILES_PATH + "/" + filename + ".stacktrace");
 		    // Write the stacktrace to disk
-	    	BufferedWriter bos = new BufferedWriter(new FileWriter(G.FILES_PATH+"/"+filename+".stacktrace"));
+	    	BufferedWriter bos = new BufferedWriter(new FileWriter(G.FILES_PATH + "/" + filename + ".stacktrace"));
             bos.write(G.ANDROID_VERSION + "\n");
             bos.write(G.PHONE_MODEL + "\n");
             bos.write(result.toString());
@@ -75,12 +75,12 @@ public class DefaultExceptionHandler implements UncaughtExceptionHandler {
 		    // Close up everything
 		    bos.close();
 		    
-	    } catch (Exception ebos) {
+	    } catch (Exception exc) {
 	    	// Nothing much we can do about this - the game is over
-	    	ebos.printStackTrace();
+	    	exc.printStackTrace();
 	    }
 		//Log.d(TAG, result.toString());	    
 		//call original handler  
-    	defaultExceptionHandler.uncaughtException(t, e);        
+    	defaultExceptionHandler.uncaughtException(thread, exception);        
 	}
 }

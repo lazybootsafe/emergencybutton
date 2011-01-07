@@ -163,8 +163,6 @@ public class EmergencyActivity extends Activity {
 		// The button was pressed now.
 		this.buttonPressedTime = SystemClock.elapsedRealtime();
 
-		// TODO: maybe still send the distress signal after a while without a
-		// location?
 		if (this.isSending.compareAndSet(false, true)) {
 			// got the lock, send out the message!
 			startDistressSignal();
@@ -274,8 +272,7 @@ public class EmergencyActivity extends Activity {
 		private void sendSMS(Context context, String phoneNo, String textMessage) {
 			if (phoneNo.length() > 0) {
 				this.setSMSState("Sending sms");
-				// SMSSender.sendSMS(EmergencyButton.this, phoneNo,
-				// message);
+
 				SMSListener smsListener = new SMSListener() {
 					public void onStatusUpdate(int resultCode,
 							String resultString) {
@@ -284,20 +281,21 @@ public class EmergencyActivity extends Activity {
 						if (resultCode != Activity.RESULT_OK) {
 							EmergencyActivity.this.smsState = STATE_X;
 						}
-						if (resultString.equals("SMS delivered")) {
+						if (resultString.equals(SMSSender.FINAL_GOOD_RESULT)) {
 							EmergencyActivity.this.smsState = STATE_V;
 						}
-						//sendUpdateGui();
+						
 						updateGUI();
 					}
 				};
+				
 				SMSSender.safeSendSMS(context, phoneNo, textMessage,
 						smsListener);
 			} else {
 				this.setSMSState("No phone number configured, not sending SMS.");
 				EmergencyActivity.this.smsState = STATE_X;
 			}
-			//sendUpdateGui();
+			
 			updateGUI();
 			
 		}
@@ -363,7 +361,7 @@ public class EmergencyActivity extends Activity {
 			
 			final Context context = EmergencyActivity.this;
 			// make sure all the fields are fresh and not null
-			EmergencyData emergency = new EmergencyData(context);
+			final EmergencyData emergency = new EmergencyData(context);
 
 			
 			// mResults = doSomethingExpensive();
@@ -383,8 +381,17 @@ public class EmergencyActivity extends Activity {
 				emailMessage += "\nNo location info.";
 			}
 			
-			this.sendSMS(context, emergency.getPhone(), textMessage);
+			final String sms = textMessage;
+			Thread t1 = new Thread() { public void run() {EmergencyThread.this.sendSMS(context, emergency.getPhone(), sms);}};
+			t1.start();
 			this.sendEmail(emergency.getEmail(), emailMessage);
+			
+			try {
+				t1.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		protected void setSMSState(String state) {

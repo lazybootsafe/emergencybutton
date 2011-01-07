@@ -103,7 +103,6 @@ public class EmergencyButton extends Activity {
 		this.saveTextEdits();
 		EmergencyData emergency = new EmergencyData(this);
 
-		// TODO: maybe this is null?
 		if ((emergency.getPhone().length() == 0) && (emergency.getEmail().length() == 0)) {
 			Toast.makeText(this, "Enter a phone number or email.",
 					Toast.LENGTH_SHORT).show();

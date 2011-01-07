@@ -43,11 +43,11 @@ public class EmailSender {
 			nameValuePairs.add(new BasicNameValuePair("subject", subject));
 			nameValuePairs.add(new BasicNameValuePair("message", message));
 			nameValuePairs.add(new BasicNameValuePair("secret", Config.secret));
-			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			// NOTE: UrlEncodedFormEntity has a default encoding of ISO-8859-1
+			//   which is perfect if you want your unicode to silently turn into 
+			//   \x1a or empty spaces.
+			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
 
-			// Execute HTTP Post Request
-			//HttpResponse response = httpclient.execute(httppost);
-			
 			// Create a response handler
 	        ResponseHandler<String> responseHandler = new BasicResponseHandler();
 	        responseBody = httpclient.execute(httppost, responseHandler);
