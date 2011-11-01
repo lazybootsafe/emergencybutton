@@ -235,9 +235,6 @@ public class SMSSender {
 			// android.os.Parcel.readException can mean either it's too long
 			// of a message or that the number given was invalid. Talk about
 			// awkward error handling.
-			EmailSender.send("admin@andluck.com", "EmergencyButtonError",
-					Utils.packageInfo(context) + "\n" + 
-					Utils.stacktrace(e));
 
 			// unregister and inform of failure
 			smsd.badEvent(SmsManager.RESULT_ERROR_GENERIC_FAILURE, "SMS error");

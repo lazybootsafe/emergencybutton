@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 public class IntroActivity extends Activity {
 	final String messages [] = {
-			"Welcome to Emergency Button, enter a phone number, email, and message. They'll be saved for an emergency.",
+			"Welcome to Emergency Button, enter a phone number, email and message. They'll be saved for an emergency.",
 			"When you press the emergency button, or both widget buttons within 5 seconds, the distress signal is sent.",
 			"Add the widget at your home screen using:\nMenu->Add->Widgets->Emergency Button"
 		};
