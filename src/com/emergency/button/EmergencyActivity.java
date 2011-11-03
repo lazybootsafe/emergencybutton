@@ -11,7 +11,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -31,9 +30,6 @@ public class EmergencyActivity extends Activity {
 	Location location = null;
 	Locator locator = null;
 	
-	//public long buttonPressedTime = 0;
-	//public long messageSentTime = 0;
-	
 	public static long signalStartedTime = 0;
 	
 	private final static long COOLDOWN_TIME_MS = 10 * 1000;
@@ -42,17 +38,15 @@ public class EmergencyActivity extends Activity {
 	private final static int STATE_V = 1;
 	private final static int STATE_X = 2;
 	
-	private static String EMERGENCY_NOW_CONFIG_NAME = "EmergencyNowState";
+	private static AtomicBoolean isSending = new AtomicBoolean(false);
 	
-	//private AtomicBoolean isSending = new AtomicBoolean(false);
+	static String locationString = "";
+	static String smsString = "";
+	static String emailString = "";
 	
-	//String locationString = "";
-	//String smsString = "";
-	//String emailString = "";
-	
-	//int locationState = STATE_X_OR_V;
-	//int smsState = STATE_X_OR_V;
-	//int emailState = STATE_X_OR_V;
+	static int locationState = STATE_X_OR_V;
+	static int smsState = STATE_X_OR_V;
+	static int emailState = STATE_X_OR_V;
 	
 	// Called when the activity is first created.
 	@Override
@@ -108,29 +102,19 @@ public class EmergencyActivity extends Activity {
 	protected void updateGUI() {
 		runOnUiThread(new Runnable() {
 		    public void run() {
-		    	SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
-		    	
-		    	updateTextField(R.id.txtLocation, guiState.getString("locationString", ""));
-		    	updateTextField(R.id.txtSMS, guiState.getString("smsString", ""));
-		    	updateTextField(R.id.txtEmail, guiState.getString("emailString", ""));
+				EmergencyActivity emthis = EmergencyActivity.this;
 				
-				updateXV(R.id.imgLocation, guiState.getInt("locationState", STATE_X_OR_V));
-				updateXV(R.id.imgSMS, guiState.getInt("smsState", STATE_X_OR_V));
-				updateXV(R.id.imgEmail, guiState.getInt("emailState", STATE_X_OR_V));
-		    	
-				EmergencyActivity.this.setProgressBarIndeterminateVisibility( guiState.getBoolean("isSending", false) );
-				
-				/*EmergencyActivity emthis = EmergencyActivity.this;
-		    	updateTextField(R.id.txtLocation, emthis.locationString);
-				updateTextField(R.id.txtSMS, emthis.smsString);
-				updateTextField(R.id.txtEmail, emthis.emailString);
+		    	updateTextField(R.id.txtLocation, EmergencyActivity.locationString);
+				updateTextField(R.id.txtSMS, EmergencyActivity.smsString);
+				updateTextField(R.id.txtEmail, EmergencyActivity.emailString);
 				
 				// TODO: rename these variables for consistency
-				updateXV(R.id.imgLocation, emthis.locationState);
-				updateXV(R.id.imgSMS, emthis.smsState);
-				updateXV(R.id.imgEmail, emthis.emailState);
-
-				emthis.setProgressBarIndeterminateVisibility( emthis.isSending.get());*/
+				updateXV(R.id.imgLocation, EmergencyActivity.locationState);
+				updateXV(R.id.imgSMS, EmergencyActivity.smsState);
+				updateXV(R.id.imgEmail, EmergencyActivity.emailState);
+				
+				
+				emthis.setProgressBarIndeterminateVisibility( getIsSendingState());
 		    }
 		});
 	}
@@ -177,29 +161,11 @@ public class EmergencyActivity extends Activity {
 		super.onDestroy();
 	}
 
-	/*
-	private synchronized void emergencyNow() {
-		Log.v("Emergency", "emergencyNow");
-		
-		// The button was pressed now.
-		this.buttonPressedTime = SystemClock.elapsedRealtime();
-
-		
-		//if (this.isSending.compareAndSet(false, true)) {
-		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = guiState.edit();
-		
-		if (guiState.get)
-			// got the lock, send out the message!
-			startDistressSignal();
-		} else {
-			Toast.makeText(this, "Already sending a message.",
-					Toast.LENGTH_SHORT).show();
-		}
-	}*/
 	
 	private void startDistressSignal() {
-		//EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
+		// NOTE: this could have been a check for isSending
+		//		but I think if the process is alive yet "isSending"
+		//		somehow wasn't reset, this is the better option.
 		
 		long now = SystemClock.elapsedRealtime();
 		if (now - signalStartedTime < COOLDOWN_TIME_MS) {
@@ -261,34 +227,28 @@ public class EmergencyActivity extends Activity {
 
 	
 	private void setLocationState(String locationString, int locationState) {
-		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = guiState.edit();
-		editor.putString("locationString", locationString);
-		editor.putInt("locationState", locationState);
-		editor.commit();
+		EmergencyActivity.locationString = locationString;
+		EmergencyActivity.locationState = locationState;
 	}
 	
 	private void setSmsState(String smsString, int smsState) {
-		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = guiState.edit();
-		editor.putString("smsString", smsString);
-		editor.putInt("smsState", smsState);
-		editor.commit();
+		EmergencyActivity.smsString = smsString;
+		EmergencyActivity.smsState = smsState;
 	}
 	
 	private void setEmailState(String emailString, int emailState) {
-		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = guiState.edit();
-		editor.putString("emailString", emailString);
-		editor.putInt("emailState", emailState);
-		editor.commit();
+		EmergencyActivity.emailString = emailString;
+		EmergencyActivity.emailState = emailState;
+		
 	}
 	
 	private void setIsSendingState(boolean isSending) {
-		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = guiState.edit();
-		editor.putBoolean("isSending", isSending);
-		editor.commit();
+		EmergencyActivity.isSending.set(isSending);
+		
+	}
+	
+	private boolean getIsSendingState() {
+		return EmergencyActivity.isSending.get();
 	}
 	
 	private class EmergencyLocator implements Locator.BetterLocationListener {
@@ -331,6 +291,8 @@ public class EmergencyActivity extends Activity {
 				this.sendMessages();
 			} finally {
 				EmergencyActivity.this.setIsSendingState(false);
+				// reset timer so we can immediately send another message if need be.
+				signalStartedTime = 0;
 				updateGUI();
 			}
 		}
