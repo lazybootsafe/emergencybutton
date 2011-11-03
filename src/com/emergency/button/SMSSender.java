@@ -24,7 +24,7 @@ public class SMSSender {
 	public static void sendSMS(Context context, String phoneNumber,
 			String message) {
 		PendingIntent pi = PendingIntent.getActivity(context, 0, new Intent(
-				context, EmergencyButton.class), 0);
+				context, EmergencyButtonActivity.class), 0);
 		SmsManager sms = SmsManager.getDefault();
 		sms.sendTextMessage(phoneNumber, null, message, pi, null);
 	}
@@ -63,9 +63,17 @@ public class SMSSender {
 
 		// TODO: maybe have an unregisterReceiver on a timer as well?
 		private void badEvent(int resultCode, String resultString) {
-			context.unregisterReceiver(sentReceiver);
-			context.unregisterReceiver(deliveredReceiver);
-			listener.onStatusUpdate(resultCode, resultString);
+			try {
+				context.unregisterReceiver(sentReceiver);
+				context.unregisterReceiver(deliveredReceiver);
+				listener.onStatusUpdate(resultCode, resultString);
+			} catch (IllegalArgumentException e) {
+				// This try/catch is because sometimes this happens:
+				// java.lang.IllegalArgumentException: Receiver not registered: com.emergency.button.SMSSender$SMSData$1@44957138
+
+				// TODO: figure out when/why this happens and fix it.
+				
+			}
 		}
 
 		private void deliveredEvent(int resultCode, String resultString) {

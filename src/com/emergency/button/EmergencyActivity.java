@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -30,22 +31,28 @@ public class EmergencyActivity extends Activity {
 	Location location = null;
 	Locator locator = null;
 	
-	public long buttonPressedTime = 0;
-	public long messageSentTime = 0;
+	//public long buttonPressedTime = 0;
+	//public long messageSentTime = 0;
+	
+	public static long signalStartedTime = 0;
+	
+	private final static long COOLDOWN_TIME_MS = 10 * 1000;
 	
 	private final static int STATE_X_OR_V = 0;
 	private final static int STATE_V = 1;
 	private final static int STATE_X = 2;
 	
-	private AtomicBoolean isSending = new AtomicBoolean(false);
+	private static String EMERGENCY_NOW_CONFIG_NAME = "EmergencyNowState";
 	
-	String locationString = "";
-	String smsString = "";
-	String emailString = "";
+	//private AtomicBoolean isSending = new AtomicBoolean(false);
 	
-	int locationState = STATE_X_OR_V;
-	int smsState = STATE_X_OR_V;
-	int emailState = STATE_X_OR_V;
+	//String locationString = "";
+	//String smsString = "";
+	//String emailString = "";
+	
+	//int locationState = STATE_X_OR_V;
+	//int smsState = STATE_X_OR_V;
+	//int emailState = STATE_X_OR_V;
 	
 	// Called when the activity is first created.
 	@Override
@@ -70,12 +77,11 @@ public class EmergencyActivity extends Activity {
 		Button btnConfigure = (Button) findViewById(R.id.btnConfigure);
 		btnConfigure.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				Intent myIntent = new Intent(EmergencyActivity.this, EmergencyButton.class);
+				Intent myIntent = new Intent(EmergencyActivity.this, EmergencyButtonActivity.class);
 				EmergencyActivity.this.startActivity(myIntent);
 			}
 		});
 
-		this.resetUIState();
 		updateGUI();
 	}
 	
@@ -102,7 +108,19 @@ public class EmergencyActivity extends Activity {
 	protected void updateGUI() {
 		runOnUiThread(new Runnable() {
 		    public void run() {
-				EmergencyActivity emthis = EmergencyActivity.this;
+		    	SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
+		    	
+		    	updateTextField(R.id.txtLocation, guiState.getString("locationString", ""));
+		    	updateTextField(R.id.txtSMS, guiState.getString("smsString", ""));
+		    	updateTextField(R.id.txtEmail, guiState.getString("emailString", ""));
+				
+				updateXV(R.id.imgLocation, guiState.getInt("locationState", STATE_X_OR_V));
+				updateXV(R.id.imgSMS, guiState.getInt("smsState", STATE_X_OR_V));
+				updateXV(R.id.imgEmail, guiState.getInt("emailState", STATE_X_OR_V));
+		    	
+				EmergencyActivity.this.setProgressBarIndeterminateVisibility( guiState.getBoolean("isSending", false) );
+				
+				/*EmergencyActivity emthis = EmergencyActivity.this;
 		    	updateTextField(R.id.txtLocation, emthis.locationString);
 				updateTextField(R.id.txtSMS, emthis.smsString);
 				updateTextField(R.id.txtEmail, emthis.emailString);
@@ -112,18 +130,16 @@ public class EmergencyActivity extends Activity {
 				updateXV(R.id.imgSMS, emthis.smsState);
 				updateXV(R.id.imgEmail, emthis.emailState);
 
-				emthis.setProgressBarIndeterminateVisibility( emthis.isSending.get());
+				emthis.setProgressBarIndeterminateVisibility( emthis.isSending.get());*/
 		    }
 		});
 	}
 	
 	protected void resetUIState() {
-		this.locationString = "Waiting For Location";
-		this.locationState = STATE_X_OR_V;
-		this.smsString = "...";
-		this.smsState = STATE_X_OR_V;
-		this.emailString = "...";
-		this.emailState = STATE_X_OR_V;
+		setLocationState("Waiting For Location", STATE_X_OR_V);
+		setEmailState("...", STATE_X_OR_V);
+		setSmsState("...", STATE_X_OR_V);
+		setIsSendingState(true);
 	}
 	
 	public static void armEmergencyActivity(Context context) {
@@ -132,16 +148,21 @@ public class EmergencyActivity extends Activity {
 	}
 	
 	@Override
-	protected void onResume() {
+	protected synchronized void onResume() {
 		super.onResume();
 		EmergencyData emer = new EmergencyData(this);
 		if(emer.getArmEmergency()) {
 			emer.setArmEmergency(false);
-			this.emergencyNow();
+			
+			this.startDistressSignal();
+
 		} else {
 			Log.v("Emergency", "emergency resumed but unarmed.");
 		}
 		this.updateGUI();
+		
+		requestGPSDialog();
+		
 	}
 	
 	@Override
@@ -156,37 +177,52 @@ public class EmergencyActivity extends Activity {
 		super.onDestroy();
 	}
 
-
-	private void emergencyNow() {
+	/*
+	private synchronized void emergencyNow() {
 		Log.v("Emergency", "emergencyNow");
 		
 		// The button was pressed now.
 		this.buttonPressedTime = SystemClock.elapsedRealtime();
 
-		if (this.isSending.compareAndSet(false, true)) {
+		
+		//if (this.isSending.compareAndSet(false, true)) {
+		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = guiState.edit();
+		
+		if (guiState.get)
 			// got the lock, send out the message!
 			startDistressSignal();
 		} else {
 			Toast.makeText(this, "Already sending a message.",
 					Toast.LENGTH_SHORT).show();
 		}
-	}
+	}*/
 	
 	private void startDistressSignal() {
-		final Context context = this;
-		EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
+		//EmergencyActivity.this.messageSentTime = SystemClock.elapsedRealtime();
+		
+		long now = SystemClock.elapsedRealtime();
+		if (now - signalStartedTime < COOLDOWN_TIME_MS) {
+			Toast.makeText(this, "Already sending a message.",
+					Toast.LENGTH_SHORT).show();
+			
+			return;
+		}
+		
+		signalStartedTime = now;
 		this.resetUIState();
-		
-		requestGPS();
-		
+		startLocator();
+	}
+	
+	private void startLocator() {
+		final Context context = this;
 		if (this.locator != null) {
 			Log.e("EmergencyActivity", "locator exists while lock is open");
 		}
 		this.locator = new Locator(context,	new EmergencyLocator());
-		
 	}
 
-	private void requestGPS() {
+	private void requestGPSDialog() {
 		final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			buildAlertMessageNoGps();
@@ -203,6 +239,7 @@ public class EmergencyActivity extends Activity {
 							public void onClick(
 									final DialogInterface dialog,
 									final int id) {
+								
 								showGpsOptions();
 							}
 						})
@@ -222,15 +259,45 @@ public class EmergencyActivity extends Activity {
 		startActivity(gpsOptionsIntent);
 	}
 
+	
+	private void setLocationState(String locationString, int locationState) {
+		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = guiState.edit();
+		editor.putString("locationString", locationString);
+		editor.putInt("locationState", locationState);
+		editor.commit();
+	}
+	
+	private void setSmsState(String smsString, int smsState) {
+		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = guiState.edit();
+		editor.putString("smsString", smsString);
+		editor.putInt("smsState", smsState);
+		editor.commit();
+	}
+	
+	private void setEmailState(String emailString, int emailState) {
+		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = guiState.edit();
+		editor.putString("emailString", emailString);
+		editor.putInt("emailState", emailState);
+		editor.commit();
+	}
+	
+	private void setIsSendingState(boolean isSending) {
+		SharedPreferences guiState = EmergencyActivity.this.getSharedPreferences(EMERGENCY_NOW_CONFIG_NAME, Context.MODE_PRIVATE);
+		SharedPreferences.Editor editor = guiState.edit();
+		editor.putBoolean("isSending", isSending);
+		editor.commit();
+	}
+	
 	private class EmergencyLocator implements Locator.BetterLocationListener {
 		public void onGoodLocation(Location location) {
 			Log.v("Emergency", "got a location");
 			if (location != null) {
-				EmergencyActivity.this.locationString = "Location found";
-				EmergencyActivity.this.locationState = STATE_V;
+				setLocationState("Location found", STATE_V);
 			} else {
-				EmergencyActivity.this.locationString = "No location info, sending anyway.";
-				EmergencyActivity.this.locationState = STATE_X;
+				setLocationState("No location info, sending anyway.", STATE_X);
 			}
 			EmergencyActivity.this.updateGUI();
 			EmergencyActivity.this.location = location;
@@ -263,26 +330,24 @@ public class EmergencyActivity extends Activity {
 			try {
 				this.sendMessages();
 			} finally {
-				EmergencyActivity.this.isSending.set(false);
-				//sendUpdateGui();
+				EmergencyActivity.this.setIsSendingState(false);
 				updateGUI();
 			}
 		}
 		
 		private void sendSMS(Context context, String phoneNo, String textMessage) {
 			if (phoneNo.length() > 0) {
-				this.setSMSState("Sending sms");
+				setSmsState("Sending sms", STATE_X_OR_V);
 
 				SMSListener smsListener = new SMSListener() {
 					public void onStatusUpdate(int resultCode,
 							String resultString) {
 						
-						EmergencyActivity.this.smsString = resultString;
 						if (resultCode != Activity.RESULT_OK) {
-							EmergencyActivity.this.smsState = STATE_X;
+							setSmsState(resultString, STATE_X);
 						}
 						if (resultString.equals(SMSSender.FINAL_GOOD_RESULT)) {
-							EmergencyActivity.this.smsState = STATE_V;
+							setSmsState(resultString, STATE_V);
 						}
 						
 						updateGUI();
@@ -292,8 +357,7 @@ public class EmergencyActivity extends Activity {
 				SMSSender.safeSendSMS(context, phoneNo, textMessage,
 						smsListener);
 			} else {
-				this.setSMSState("No phone number configured, not sending SMS.");
-				EmergencyActivity.this.smsState = STATE_X;
+				setSmsState("No phone number configured, not sending SMS.", STATE_X);
 			}
 			
 			updateGUI();
@@ -302,25 +366,20 @@ public class EmergencyActivity extends Activity {
 		
 		private void sendEmail(String emailAddress, String emailMessage) {
 			if (emailAddress.length() > 0) {
-				this.setEmailState("Sending email");
-				//sendUpdateGui();
+				setEmailState("Sending email", STATE_X_OR_V);
 				updateGUI();
 				
 				boolean success = EmailSender.send(emailAddress,
 						emailMessage);
 				if (success) {
-					setEmailState("Email sent");
-					EmergencyActivity.this.emailState = STATE_V;
+					setEmailState("Email sent", STATE_V);
 				} else {
-					setEmailState("Failed sending email");
-					EmergencyActivity.this.emailState = STATE_X;
+					setEmailState("Failed sending email", STATE_X);
 				}
 			} else {
-				this.setEmailState("No email configured, not sending email.");
-				EmergencyActivity.this.emailState = STATE_X;
+				setEmailState("No email configured, not sending email.", STATE_X);
 			}
 			
-			//sendUpdateGui();
 			updateGUI();
 			
 		}
@@ -382,28 +441,17 @@ public class EmergencyActivity extends Activity {
 			}
 			
 			final String sms = textMessage;
-			Thread t1 = new Thread() { public void run() {EmergencyThread.this.sendSMS(context, emergency.getPhone(), sms);}};
-			t1.start();
+			Thread smsThread = new Thread() { public void run() {EmergencyThread.this.sendSMS(context, emergency.getPhone(), sms);}};
+			smsThread.start();
+			
 			this.sendEmail(emergency.getEmail(), emailMessage);
 			
 			try {
-				t1.join();
+				smsThread.join();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		
-		protected void setSMSState(String state) {
-			//TextView txt = (TextView)findViewById(R.id.txtSMS);
-			//txt.setText(state);
-			//sendToHandler(R.id.txtSMS, state);
-			EmergencyActivity.this.smsString = state;
-		}
-
-		protected void setEmailState(String state) {
-			//sendToHandler(R.id.txtEmail, state);
-			EmergencyActivity.this.emailString = state;
 		}
 		
 	}

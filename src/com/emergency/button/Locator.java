@@ -32,7 +32,7 @@ public class Locator {
 	private static final int MINUTE_MS = 60 * SECOND_MS;
 	
 	
-	private static final int MAX_WAITING_TIME_MS = 20 * SECOND_MS;
+	private static final int MAX_WAITING_TIME_MS = 40 * SECOND_MS;
 	private static final float REQUIRED_ACCURACY_METERS = 50;
 	private static final int LARGE_LOCATION_AGE_MS = 2 * MINUTE_MS;
 	

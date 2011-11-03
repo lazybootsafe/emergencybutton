@@ -54,14 +54,31 @@
 	        android:layout_width="fill_parent" 
 	        android:layout_height="wrap_content" 
 	        android:text="Phone number of recipient (optional)"
-	        />     
-	    <EditText 
-	        android:id="@+id/txtPhoneNo"  
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content"
-	        android:inputType="phone"        
-	        android:hint="(212)664-7665"
 	        />
+	    
+	    <LinearLayout 
+		    android:orientation="horizontal"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    >
+		        
+		    <EditText 
+		        android:id="@+id/txtPhoneNo"  
+		        android:layout_weight="1"
+		        android:layout_width="fill_parent" 
+		        android:layout_height="wrap_content"
+		        android:inputType="phone"        
+		        android:hint="(212)664-7665"
+		        />
+			<!--< ImageButton
+			    android:id="@+id/btnContacts"
+			    android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+			    android:background="@drawable/plus"
+			    android:layout_gravity="center"
+			    /> -->
+		</LinearLayout>    
+
 	        
 	    <TextView  
 	        android:layout_width="fill_parent" 
