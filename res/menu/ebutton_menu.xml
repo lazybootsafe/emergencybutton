@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/project_page"
+          android:icon="@drawable/web"
+          android:title="Andluck's page"
+          />
+    <item android:id="@+id/credits"
+          android:icon="@drawable/credits"
+          android:title="Credits"
+          />
+<!--     <item android:id="@+id/recalibrate_noise" -->
+<!--           android:icon="@drawable/wave" -->
+<!--           android:title="recalibrate noise" -->
+<!--           /> -->
+</menu>
