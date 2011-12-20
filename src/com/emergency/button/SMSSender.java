@@ -80,9 +80,19 @@ public class SMSSender {
 			int delivered = SMSData.this.deliveredCount.incrementAndGet();
 			if (delivered == this.totalMessages) {
 				// done with everything
-				context.unregisterReceiver(sentReceiver);
-				context.unregisterReceiver(deliveredReceiver);
-				listener.onStatusUpdate(resultCode, resultString);
+				try {
+					context.unregisterReceiver(sentReceiver);
+					context.unregisterReceiver(deliveredReceiver);
+					listener.onStatusUpdate(resultCode, resultString);
+				} catch (IllegalArgumentException e) {
+					// This fixes this bug:
+					// package_name=com.emergency.button, package_version=1.4, phone_model=SGH-T959,
+					// android_version=2.1-update1, stacktrace=java.lang.RuntimeException: Error
+					// receiving broadcast Intent { act=SMS_DELIVERED (has extras) } in
+					// com.emergency.button.SMSSender$SMSData$2@47ae4d28
+					// TODO: figure out why/when this happens
+					
+				}
 			}
 		}
 
