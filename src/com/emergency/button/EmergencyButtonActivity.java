@@ -1,10 +1,14 @@
 package com.emergency.button;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.nullwire.trace.ExceptionHandler;
 
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,14 +17,21 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 
 public class EmergencyButtonActivity extends Activity {
 
+	static private MoreEditText mPhonesMoreEditText = null;
+	static private MoreEditText mEmailsMoreEditText = null;
+	
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -29,6 +40,9 @@ public class EmergencyButtonActivity extends Activity {
 
 		ExceptionHandler.register(this, new StackMailer());
 		
+	}
+
+	private void initUI() {
 		setContentView(R.layout.main);
 
 		this.restoreTextEdits();
@@ -48,102 +62,32 @@ public class EmergencyButtonActivity extends Activity {
 			}
 		});
 
-		/*
-		ImageButton btnContacts = (ImageButton) findViewById(R.id.btnContacts);
-		btnContacts.setOnClickListener(new View.OnClickListener() {
+
+		/*Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);  
+		startActivityForResult(intent, CONTACT_PICKER_RESULT);*/
+
+		
+		ImageButton btnPhoneNoPlus = (ImageButton) findViewById(R.id.btnPhoneNoPlus);
+		btnPhoneNoPlus.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);  
-				startActivityForResult(intent, CONTACT_PICKER_RESULT);
+				mPhonesMoreEditText.addRow("");
 			}
 		});
-		*/
 		
-
-	}
-
-	/*
-	protected void onActivityResult(int reqCode, int resultCode, Intent data) {
-        super.onActivityResult(reqCode, resultCode, data);
-        if(resultCode == RESULT_OK) {
-            switch (reqCode) {
-            case CONTACT_PICKER_RESULT:
-                Cursor cursor = null;
-                String number = "";
-                String lastName ="";
-                try {
-
-                    Uri result = data.getData();
-
-                    //get the id from the uri
-                    String id = result.getLastPathSegment();  
-
-                    //query
-                    cursor = getContentResolver().query(
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                            null,
-                            ContactsContract.CommonDataKinds.Phone._ID + " = ? " , new String[] {id}, null);
-
-//                  cursor = getContentResolver().query(Phone.CONTENT_URI,
-//                          null, Phone.CONTACT_ID + "=?", new String[] { id },
-//                          null);
-
-                    int numberIdx = cursor.getColumnIndex(Phone.DATA);  
-
-                    if(cursor.moveToFirst()) {
-                        number = cursor.getString(numberIdx);
-                        //lastName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME));
-                    } else {
-                        //WE FAILED
-                    }
-                } catch (Exception e) {
-                    //failed
-                } finally {
-                    if (cursor!=null) {
-                        cursor.close();
-                    }
-                    //EditText numberEditText = (EditText)findViewById(R.id.number);
-                    //numberEditText.setText(number);
-                    setPhoneNum(number);
-                    //EditText lastNameEditText = (EditText)findViewById(R.id.last_name);
-                    //lastNameEditText.setText(lastName);
-
-                }
-
-            }
-        }
-    }*/
-        
-	private static final int CONTACT_PICKER_RESULT = 1001;
-	public static void getContacts(ContentResolver cr) {
-		Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null,
-				null, null, null);
-		if (cur.getCount() > 0) {
-			while (cur.moveToNext()) {
-				// read id
-				String id = cur.getString(cur
-						.getColumnIndex(ContactsContract.Contacts._ID));
-				/** read names **/
-				String displayName = cur
-						.getString(cur
-								.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-				/** Phone Numbers **/
-				Cursor pCur = cr.query(
-						ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-						null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID
-								+ " = ?", new String[] { id }, null);
-				while (pCur.moveToNext()) {
-					String number = pCur
-							.getString(pCur
-									.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-					String typeStr = pCur
-							.getString(pCur
-									.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE));
-				}
-				pCur.close();
-
+		ImageButton btnEmailPlus = (ImageButton) findViewById(R.id.btnEmailPlus);
+		btnEmailPlus.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mEmailsMoreEditText.addRow("");
 			}
-		}
+		});
 	}
+	
+	public void onConfigurationChanged(Configuration newConfig) {
+	    super.onConfigurationChanged(newConfig);
+	    initUI();
+	}
+	
+	
 	private class StackMailer implements ExceptionHandler.StackTraceHandler {
 		public void onStackTrace(String stackTrace) {
 			EmailSender.send("admin@andluck.com", "EmergencyButtonError", "EmergencyButtonError\n" + stackTrace);
@@ -161,6 +105,7 @@ public class EmergencyButtonActivity extends Activity {
 	protected void onResume()
 	{
 		super.onResume();
+		initUI();
 		IntroActivity.openOnceAfterInstallation(this);
 	}
 	
@@ -177,6 +122,7 @@ public class EmergencyButtonActivity extends Activity {
 		super.onStop();
 	}	
 
+	/*
 	public void setPhoneNum(String phoneNumber) {
 		// gui
 		EditText txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
@@ -185,18 +131,132 @@ public class EmergencyButtonActivity extends Activity {
 		// save
 		EmergencyData emergency = new EmergencyData(this);
 		emergency.setPhone(txtPhoneNo.getText().toString());
+	}*/
+
+	private class EditTextRow {
+		LinearLayout mLinlay;
+		EditText mEditText;
+		ImageButton mRemoveBtn;
+		
+		public EditTextRow(String text) {
+			mEditText = new EditText(EmergencyButtonActivity.this);
+			// set weight so the button is only as big as it needs to contain the image.
+			mEditText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
+			mEditText.setText(text);
+			mEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+			
+			mRemoveBtn = new ImageButton(EmergencyButtonActivity.this);
+			mRemoveBtn.setBackgroundResource(R.drawable.grey_x);
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER;
+			mRemoveBtn.setLayoutParams(params);
+			
+			mLinlay = new LinearLayout(EmergencyButtonActivity.this);
+			mLinlay.setOrientation(LinearLayout.HORIZONTAL);
+			mLinlay.addView(mEditText);
+			mLinlay.addView(mRemoveBtn);
+		}
 	}
 	
-	public void restoreTextEdits() {
-		EditText txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
-		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
-		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
-
-		EmergencyData emergency = new EmergencyData(this);
+	private class MoreEditText {
+		private LinearLayout mContainer;
+		private ArrayList<EditText> mEditTextList = null;
 		
-		txtPhoneNo.setText(emergency.getPhone());
-		txtEmail.setText(emergency.getEmail());
-		txtMessage.setText(emergency.getMessage());
+		public MoreEditText(LinearLayout container, List<String> stringsList) {
+			mContainer = container;
+			mEditTextList = new ArrayList<EditText>();
+			for (int i = 0; i < stringsList.size(); i++) {
+				EditText edit;
+				if (i == 0) {
+					//txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
+					edit = getDefaultTextEdit(container);
+					edit.setText(stringsList.get(i));
+					mEditTextList.add(edit);
+				} else {
+					addRow(stringsList.get(i));
+				}
+				
+			}
+		}
+		
+		public void restore(LinearLayout container, List<String> stringsList) {
+			mContainer = container;
+			
+			for(int i = 0; i < mEditTextList.size(); i++) {
+				EditText edit;
+				if (i == 0) {
+					// the first row is the default one (with the "+")
+					edit = getDefaultTextEdit(container);
+					mEditTextList.set(0, edit);
+					if (stringsList.size() > 0) {
+						edit.setText(stringsList.get(0));
+					}
+				} else {
+					edit = mEditTextList.get(i);
+					View viewRow = (LinearLayout) edit.getParent();
+					((LinearLayout)viewRow.getParent()).removeView(viewRow);
+					mContainer.addView(viewRow);
+				}
+				
+			}
+		}
+		
+		public EditText getDefaultTextEdit(LinearLayout container) {
+			// TODO: turn this into something like "getEditTextChild" rather than counting on the index "0"
+			return (EditText) ((LinearLayout)container.getChildAt(0)).getChildAt(0);
+			
+		}
+		
+		public void removeRow(EditText editText) {
+			mContainer.removeView((View) editText.getParent());
+			mEditTextList.remove(editText);
+		}
+		
+		public void addRow(String text) {
+			final EditTextRow editRow = new EditTextRow(text);
+			editRow.mRemoveBtn.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					MoreEditText.this.removeRow(editRow.mEditText);
+				}
+			});
+			
+			mContainer.addView(editRow.mLinlay);
+			mEditTextList.add(editRow.mEditText);
+		}
+		
+		public List<String> GetTexts() {
+			ArrayList<String> texts = new ArrayList<String>(); 
+			for (int i = 0; i < mEditTextList.size(); i ++) {
+				texts.add(mEditTextList.get(i).getText().toString());
+			}
+			
+			return texts;
+		}
+
+
+	}
+	
+	private void addPhonesEmailsUI(List<String> phones, List<String> emails) {
+		LinearLayout phoneNoLin = (LinearLayout)findViewById(R.id.linPhoneNo);
+		LinearLayout emailLin = (LinearLayout)findViewById(R.id.linEmail);
+		// NOTE: we don't always create from scratch so that empty textboxes
+		//		aren't erased on changes of orientation.
+		if (mPhonesMoreEditText == null) {
+			mPhonesMoreEditText = new MoreEditText(phoneNoLin, phones);
+			mEmailsMoreEditText = new MoreEditText(emailLin, emails);
+		} else {
+			mPhonesMoreEditText.restore(phoneNoLin, phones);
+			mEmailsMoreEditText.restore(emailLin, emails);
+		}
+	}
+	
+
+	public void restoreTextEdits() {
+		EmergencyData emergencyData = new EmergencyData(this);
+		
+		addPhonesEmailsUI(emergencyData.getPhones(), emergencyData.getEmails());
+		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
+		txtMessage.setText(emergencyData.getMessage());
 	}
 
 	public void saveTextEdits() {
@@ -204,17 +264,19 @@ public class EmergencyButtonActivity extends Activity {
 		EditText txtMessage = (EditText) findViewById(R.id.txtMessage);
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
-		EmergencyData emergency = new EmergencyData(this);
-		emergency.setPhone(txtPhoneNo.getText().toString());
-		emergency.setEmail(txtEmail.getText().toString());
-		emergency.setMessage(txtMessage.getText().toString());
+		EmergencyData emergencyData = new EmergencyData(this);
+		emergencyData.setPhones(mPhonesMoreEditText.GetTexts());
+		emergencyData.setEmails(mEmailsMoreEditText.GetTexts());
+		//emergencyData(txtPhoneNo.getText().toString());
+		//emergencyData(txtEmail.getText().toString());
+		emergencyData.setMessage(txtMessage.getText().toString());
 	}
 
 	public void redButtonPressed() {
 		this.saveTextEdits();
 		EmergencyData emergency = new EmergencyData(this);
 
-		if ((emergency.getPhone().length() == 0) && (emergency.getEmail().length() == 0)) {
+		if ((emergency.getPhones().size() == 0) && (emergency.getEmails().size() == 0)) {
 			Toast.makeText(this, "Enter a phone number or email.",
 					Toast.LENGTH_SHORT).show();
 			return;

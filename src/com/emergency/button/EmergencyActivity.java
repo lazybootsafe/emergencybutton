@@ -2,6 +2,7 @@ package com.emergency.button;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.emergency.button.SMSSender.SMSListener;
@@ -297,33 +298,34 @@ public class EmergencyActivity extends Activity {
 			}
 		}
 		
-		private void sendSMS(Context context, String phoneNo, String textMessage) {
-			if (phoneNo.length() > 0) {
-				setSmsState("Sending sms", STATE_X_OR_V);
-
-				SMSListener smsListener = new SMSListener() {
-					public void onStatusUpdate(int resultCode,
-							String resultString) {
-						
-						if (resultCode != Activity.RESULT_OK) {
-							setSmsState(resultString, STATE_X);
+		private void sendSMS(Context context, List<String> phoneNoList, String textMessage) {
+			for(String phoneNo: phoneNoList) {
+				if (phoneNo.length() > 0) {
+					setSmsState("Sending sms", STATE_X_OR_V);
+	
+					SMSListener smsListener = new SMSListener() {
+						public void onStatusUpdate(int resultCode,
+								String resultString) {
+							
+							if (resultCode != Activity.RESULT_OK) {
+								setSmsState(resultString, STATE_X);
+							}
+							if (resultString.equals(SMSSender.FINAL_GOOD_RESULT)) {
+								setSmsState(resultString, STATE_V);
+							}
+							
+							updateGUI();
 						}
-						if (resultString.equals(SMSSender.FINAL_GOOD_RESULT)) {
-							setSmsState(resultString, STATE_V);
-						}
-						
-						updateGUI();
-					}
-				};
+					};
+					
+					SMSSender.safeSendSMS(context, phoneNo, textMessage,
+							smsListener);
+				} else {
+					setSmsState("No phone number configured, not sending SMS.", STATE_X);
+				}
 				
-				SMSSender.safeSendSMS(context, phoneNo, textMessage,
-						smsListener);
-			} else {
-				setSmsState("No phone number configured, not sending SMS.", STATE_X);
+				updateGUI();
 			}
-			
-			updateGUI();
-			
 		}
 		
 		private void sendEmail(String emailAddress, String emailMessage) {
@@ -403,10 +405,15 @@ public class EmergencyActivity extends Activity {
 			}
 			
 			final String sms = textMessage;
-			Thread smsThread = new Thread() { public void run() {EmergencyThread.this.sendSMS(context, emergency.getPhone(), sms);}};
+			Thread smsThread = new Thread() { public void run() {
+				EmergencyThread.this.sendSMS(context, emergency.getPhones(), sms);
+				}
+			};
 			smsThread.start();
 			
-			this.sendEmail(emergency.getEmail(), emailMessage);
+			for (String email : emergency.getEmails()) {
+				this.sendEmail(email, emailMessage);
+			}
 			
 			try {
 				smsThread.join();

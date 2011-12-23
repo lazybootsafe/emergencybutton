@@ -41,15 +41,37 @@
 	        android:layout_width="fill_parent" 
 	        android:layout_height="wrap_content" 
 	        android:text="Email of recipient (optional)"
-	        />     
-	    <EditText 
-	        android:id="@+id/txtEmail"  
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content"
-	        android:inputType="textEmailAddress"        
-	        android:hint="dad@email.com"
 	        />
-	        
+	    
+        <LinearLayout 
+	        android:id="@+id/linEmail"  
+		    android:orientation="vertical"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    > 
+	        <LinearLayout 
+			    android:orientation="horizontal"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    > 
+			    <EditText 
+			        android:id="@+id/txtEmail"  
+			        android:layout_weight="1"
+			        android:layout_width="fill_parent" 
+			        android:layout_height="wrap_content"
+			        android:inputType="textEmailAddress"        
+			        android:hint="dad@email.com"
+			        />
+				<ImageButton
+				    android:id="@+id/btnEmailPlus"
+				    android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+				    android:background="@drawable/grey_plus"
+				    android:layout_gravity="center"
+				    />
+		    </LinearLayout>
+	    </LinearLayout>
+	    
 	    <TextView
 	        android:layout_width="fill_parent" 
 	        android:layout_height="wrap_content" 
@@ -57,28 +79,34 @@
 	        />
 	    
 	    <LinearLayout 
-		    android:orientation="horizontal"
+	        android:id="@+id/linPhoneNo"  
+		    android:orientation="vertical"
 		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
+		    android:layout_height="wrap_content"
 		    >
-		        
-		    <EditText 
-		        android:id="@+id/txtPhoneNo"  
-		        android:layout_weight="1"
-		        android:layout_width="fill_parent" 
-		        android:layout_height="wrap_content"
-		        android:inputType="phone"        
-		        android:hint="(212)664-7665"
-		        />
-			<!--< ImageButton
-			    android:id="@+id/btnContacts"
-			    android:layout_height="wrap_content"
-				android:layout_width="wrap_content"
-			    android:background="@drawable/plus"
-			    android:layout_gravity="center"
-			    /> -->
-		</LinearLayout>    
-
+		    <LinearLayout 
+			    android:orientation="horizontal"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    >
+			        
+			    <EditText 
+			        android:id="@+id/txtPhoneNo"  
+			        android:layout_weight="1"
+			        android:layout_width="fill_parent" 
+			        android:layout_height="wrap_content"
+			        android:inputType="phone"        
+			        android:hint="(212)664-7665"
+			        />
+				<ImageButton
+				    android:id="@+id/btnPhoneNoPlus"
+				    android:layout_height="wrap_content"
+					android:layout_width="wrap_content"
+				    android:background="@drawable/grey_plus"
+				    android:layout_gravity="center"
+				    />
+			</LinearLayout>
+		</LinearLayout>
 	        
 	    <TextView  
 	        android:layout_width="fill_parent" 
