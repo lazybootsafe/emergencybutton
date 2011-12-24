@@ -65,21 +65,6 @@ public class EmergencyButtonActivity extends Activity {
 
 		/*Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);  
 		startActivityForResult(intent, CONTACT_PICKER_RESULT);*/
-
-		
-		ImageButton btnPhoneNoPlus = (ImageButton) findViewById(R.id.btnPhoneNoPlus);
-		btnPhoneNoPlus.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				mPhonesMoreEditText.addRow("");
-			}
-		});
-		
-		ImageButton btnEmailPlus = (ImageButton) findViewById(R.id.btnEmailPlus);
-		btnEmailPlus.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				mEmailsMoreEditText.addRow("");
-			}
-		});
 	}
 	
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -138,12 +123,14 @@ public class EmergencyButtonActivity extends Activity {
 		EditText mEditText;
 		ImageButton mRemoveBtn;
 		
-		public EditTextRow(String text) {
+		public EditTextRow(String text, EditText example) {
 			mEditText = new EditText(EmergencyButtonActivity.this);
 			// set weight so the button is only as big as it needs to contain the image.
-			mEditText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
+			//mEditText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1));
+			mEditText.setLayoutParams(example.getLayoutParams());
 			mEditText.setText(text);
-			mEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+			//mEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+			mEditText.setInputType(example.getInputType());
 			
 			mRemoveBtn = new ImageButton(EmergencyButtonActivity.this);
 			mRemoveBtn.setBackgroundResource(R.drawable.grey_x);
@@ -163,23 +150,25 @@ public class EmergencyButtonActivity extends Activity {
 		private ArrayList<EditText> mEditTextList = null;
 		
 		public MoreEditText(LinearLayout container, List<String> stringsList) {
+			// Create the rows from scratch, this should only happen onCreate
+			
 			mContainer = container;
 			mEditTextList = new ArrayList<EditText>();
-			for (int i = 0; i < stringsList.size(); i++) {
-				EditText edit;
-				if (i == 0) {
-					//txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
-					edit = getDefaultTextEdit(container);
-					edit.setText(stringsList.get(i));
-					mEditTextList.add(edit);
-				} else {
-					addRow(stringsList.get(i));
-				}
-				
+			//txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
+			EditText edit;
+			edit = getDefaultTextEdit(container);
+			if(! stringsList.isEmpty()) {
+				edit.setText(stringsList.get(0));
+			}
+			mEditTextList.add(edit);
+			for (int i = 1; i < stringsList.size(); i++) {
+				addRow(stringsList.get(i));
 			}
 		}
 		
 		public void restore(LinearLayout container, List<String> stringsList) {
+			// Create the rows from older existing rows, this can happen on
+			// changes of orientation, onResume, etc
 			mContainer = container;
 			
 			for(int i = 0; i < mEditTextList.size(); i++) {
@@ -213,7 +202,7 @@ public class EmergencyButtonActivity extends Activity {
 		}
 		
 		public void addRow(String text) {
-			final EditTextRow editRow = new EditTextRow(text);
+			final EditTextRow editRow = new EditTextRow(text, mEditTextList.get(0));
 			editRow.mRemoveBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					MoreEditText.this.removeRow(editRow.mEditText);
@@ -248,6 +237,21 @@ public class EmergencyButtonActivity extends Activity {
 			mPhonesMoreEditText.restore(phoneNoLin, phones);
 			mEmailsMoreEditText.restore(emailLin, emails);
 		}
+		
+		// register the Plus buttons
+		ImageButton btnPhoneNoPlus = (ImageButton) findViewById(R.id.btnPhoneNoPlus);
+		btnPhoneNoPlus.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mPhonesMoreEditText.addRow("");
+			}
+		});
+		
+		ImageButton btnEmailPlus = (ImageButton) findViewById(R.id.btnEmailPlus);
+		btnEmailPlus.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				mEmailsMoreEditText.addRow("");
+			}
+		});
 	}
 	
 

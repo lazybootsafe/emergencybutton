@@ -39,7 +39,7 @@ public class EmailSender {
 			// Add your data
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 			nameValuePairs.add(new BasicNameValuePair("to", to));
-			nameValuePairs.add(new BasicNameValuePair("from", "Emergency Button <EmergencyButtonApp@gmail.com>"));
+			nameValuePairs.add(new BasicNameValuePair("from", "Emergency Button <EmergencyButton@emailbyweb.appspotmail.com>")); //"Emergency Button <EmergencyButtonApp@gmail.com>"));
 			nameValuePairs.add(new BasicNameValuePair("subject", subject));
 			nameValuePairs.add(new BasicNameValuePair("message", message));
 			nameValuePairs.add(new BasicNameValuePair("secret", Config.secret));
