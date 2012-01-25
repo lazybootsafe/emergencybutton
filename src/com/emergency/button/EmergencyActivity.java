@@ -31,6 +31,7 @@ public class EmergencyActivity extends Activity {
 	Location location = null;
 	Locator locator = null;
 	
+	private static String LOG_TAG = "EmergencyActivity";
 	public static long signalStartedTime = 0;
 	
 	private final static long COOLDOWN_TIME_MS = 10 * 1000;
@@ -105,17 +106,16 @@ public class EmergencyActivity extends Activity {
 		    public void run() {
 				EmergencyActivity emthis = EmergencyActivity.this;
 				
-		    	updateTextField(R.id.txtLocation, EmergencyActivity.locationString);
-				updateTextField(R.id.txtSMS, EmergencyActivity.smsString);
-				updateTextField(R.id.txtEmail, EmergencyActivity.emailString);
+		    	//updateTextField(R.id.txtLocation, EmergencyActivity.locationString);
+				//updateTextField(R.id.txtSMS, EmergencyActivity.smsString);
+				//updateTextField(R.id.txtEmail, EmergencyActivity.emailString);
 				
-				// TODO: rename these variables for consistency
 				updateXV(R.id.imgLocation, EmergencyActivity.locationState);
-				updateXV(R.id.imgSMS, EmergencyActivity.smsState);
-				updateXV(R.id.imgEmail, EmergencyActivity.emailState);
+				//updateXV(R.id.imgSMS, EmergencyActivity.smsState);
+				//updateXV(R.id.imgEmail, EmergencyActivity.emailState);
 				
-				
-				emthis.setProgressBarIndeterminateVisibility( getIsSendingState());
+				emthis.setProgressBarIndeterminateVisibility(getIsSendingState());
+				Log.e(LOG_TAG, "Update gui finished.");
 		    }
 		});
 	}
@@ -132,9 +132,7 @@ public class EmergencyActivity extends Activity {
 		emer.setArmEmergency(true);
 	}
 	
-	@Override
-	protected synchronized void onResume() {
-		super.onResume();
+	private synchronized void resumeEmergency() {
 		EmergencyData emer = new EmergencyData(this);
 		if(emer.getArmEmergency()) {
 			emer.setArmEmergency(false);
@@ -147,7 +145,12 @@ public class EmergencyActivity extends Activity {
 		this.updateGUI();
 		
 		requestGPSDialog();
-		
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		resumeEmergency();
 	}
 	
 	@Override
