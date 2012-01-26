@@ -67,7 +67,8 @@
         $mail = $smtp->send($to, $headers, $body);
 
         if (PEAR::isError($mail)) {
-           echo("<p>Error: " . $mail->getMessage() . "</p>");
+           //echo("<p>Error: " . $mail->getMessage() . "</p>");
+           echo("email fail");
            mylog($mail->getMessage());
            $t->doTrackPageView('fail');
          } else {
@@ -75,6 +76,8 @@
            mylog("success $to $subject $secret");
            //$t->doTrackPageView('success');
          }
+         
+         // an attempt to use the 1pixel piwik analytics directly
          //require_once "../piwik/piwik.php";
 
     ?>

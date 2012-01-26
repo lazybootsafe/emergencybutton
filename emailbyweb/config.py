@@ -1,0 +1,2 @@
+
+SECRET_CODE = 'whateveryourcodeis'
