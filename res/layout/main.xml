@@ -2,124 +2,146 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent" 
         android:layout_height="wrap_content" 
-	>
-	<LinearLayout 
-	    android:orientation="vertical"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    >
-		<LinearLayout 
-		    android:orientation="horizontal"
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    >	    
-		    <TextView  
-		        android:layout_width="wrap_content" 
-		        android:layout_height="wrap_content" 
-		        android:layout_weight="1"
-		        android:text="Press this button in case of emergency"
-		        
-		        />
-			<ImageButton
-			    android:id="@+id/btnHelp"
-			    android:layout_height="wrap_content"
-				android:layout_width="wrap_content"
-			    android:background="@drawable/question_small"
-			    android:layout_gravity="right"
-			    />
-		</LinearLayout>
-		        
-		<ImageButton
-		    android:id="@+id/btnEmergency"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:background="@drawable/emergency_button"
-		    android:layout_gravity="center"
-		    />
-		    
-	    <TextView  
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content" 
-	        android:text="Email of recipient (optional)"
-	        />
-	    
+    >
+    <LinearLayout 
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+        <RelativeLayout 
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:paddingRight="10dp"
+            >
+
+            <ImageButton
+                android:id="@+id/btnHelp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:background="@drawable/question_small"
+                android:layout_alignParentRight="true"
+                />
+        </RelativeLayout>
+            
+        <ImageButton
+            android:id="@+id/btnEmergency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/emergency_button"
+            android:layout_gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
+            />
         <LinearLayout 
-	        android:id="@+id/linEmail"  
-		    android:orientation="vertical"
-		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
-		    > 
-	        <LinearLayout 
-			    android:orientation="horizontal"
-			    android:layout_width="fill_parent"
-			    android:layout_height="fill_parent"
-			    > 
-			    <EditText 
-			        android:id="@+id/txtEmail"  
-			        android:layout_weight="1"
-			        android:layout_width="fill_parent" 
-			        android:layout_height="wrap_content"
-			        android:inputType="textEmailAddress"        
-			        android:hint="dad@email.com"
-			        />
-				<ImageButton
-				    android:id="@+id/btnEmailPlus"
-				    android:layout_height="wrap_content"
-					android:layout_width="wrap_content"
-				    android:background="@drawable/grey_plus"
-				    android:layout_gravity="center"
-				    />
-		    </LinearLayout>
-	    </LinearLayout>
-	    
-	    <TextView
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content" 
-	        android:text="Phone number of recipient (optional)"
-	        />
-	    
-	    <LinearLayout 
-	        android:id="@+id/linPhoneNo"  
-		    android:orientation="vertical"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    >
-		    <LinearLayout 
-			    android:orientation="horizontal"
-			    android:layout_width="fill_parent"
-			    android:layout_height="fill_parent"
-			    >
-			        
-			    <EditText 
-			        android:id="@+id/txtPhoneNo"  
-			        android:layout_weight="1"
-			        android:layout_width="fill_parent" 
-			        android:layout_height="wrap_content"
-			        android:inputType="phone"        
-			        android:hint="(212)664-7665"
-			        />
-				<ImageButton
-				    android:id="@+id/btnPhoneNoPlus"
-				    android:layout_height="wrap_content"
-					android:layout_width="wrap_content"
-				    android:background="@drawable/grey_plus"
-				    android:layout_gravity="center"
-				    />
-			</LinearLayout>
-		</LinearLayout>
-	        
-	    <TextView  
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content"
-	        android:text="Message added in SMS and email"
-	        />     
-	    <EditText 
-	        android:id="@+id/txtMessage"  
-	        android:hint="John is in trouble"
-	        android:layout_width="fill_parent" 
-	        android:layout_height="120px"
-	        android:gravity="top"
-	        />          
-	</LinearLayout>
+            android:id="@+id/linEmail"  
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            > 
+            <LinearLayout 
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:paddingRight="10dp"
+                >
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/main_email"
+                    />
+                <EditText 
+                    android:id="@+id/txtEmail"  
+                    android:layout_weight="1"
+                    android:layout_width="fill_parent" 
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"        
+                    android:hint="Email"
+                    />
+                <!--ImageButton
+                    android:id="@+id/btnEmailPlus"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:background="@drawable/grey_plus"
+                    android:layout_gravity="center"
+                    /-->
+            </LinearLayout>
+       </LinearLayout>
+        
+       <!-- Note that the special padding for this TextView is to compensate for having no capital letters -->
+       <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:text="- and/or -"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:paddingTop="0sp"
+            android:paddingBottom="3sp"
+            />
+
+        <LinearLayout 
+            android:id="@+id/linPhoneNo"  
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            >
+            <LinearLayout 
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                >
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/main_phone"
+                    />
+                <EditText 
+                    android:id="@+id/txtPhoneNo"  
+                    android:layout_weight="1"
+                    android:layout_width="fill_parent" 
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"        
+                    android:hint="SMS Number"
+                    />
+                <!--ImageButton
+                    android:id="@+id/btnPhoneNoPlus"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:background="@drawable/grey_plus"
+                    android:layout_gravity="center"
+                    /-->
+            </LinearLayout>
+        </LinearLayout>
+        
+        <LinearLayout 
+            android:id="@+id/linMessage"  
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            >
+            <LinearLayout 
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                >
+            <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/main_msg"
+                    />
+            <EditText 
+                android:id="@+id/txtMessage"  
+                android:hint="Message"
+                android:layout_width="fill_parent" 
+                android:layout_height="120px"
+                android:gravity="top"
+                />
+            </LinearLayout>
+        </LinearLayout>            
+    </LinearLayout>
 </ScrollView>
 

@@ -50,6 +50,17 @@ public class EmergencyActivity extends Activity {
 	static int smsState = STATE_X_OR_V;
 	static int emailState = STATE_X_OR_V;
 	
+	static ImageView imgSms;
+	static ImageView imgLocation;
+	static ImageView imgEmail;
+	
+	static TextView txtSms;
+	static TextView txtLocation;
+	static TextView txtEmail;
+	
+	static Activity mLiveThis;
+	
+	
 	// Called when the activity is first created.
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -78,16 +89,15 @@ public class EmergencyActivity extends Activity {
 			}
 		});
 
-		updateGUI();
+		//updateGUI();
 	}
 	
-	private void updateTextField(int id, String text) {
-		TextView txt = (TextView)findViewById(id);
+	
+	private void updateTextField(TextView txt, String text) {
 		txt.setText(text);
 	}
 	
-	private void updateXV(int id, int state) {
-		ImageView img = (ImageView)findViewById(id);
+	private void updateXV(ImageView img, int state) {
 		switch (state) {
 		case STATE_X:
 			img.setImageResource(R.drawable.x);
@@ -104,18 +114,15 @@ public class EmergencyActivity extends Activity {
 	protected void updateGUI() {
 		runOnUiThread(new Runnable() {
 		    public void run() {
-				EmergencyActivity emthis = EmergencyActivity.this;
+		    	updateTextField(txtLocation, EmergencyActivity.locationString);
+				updateTextField(txtSms, EmergencyActivity.smsString);
+				updateTextField(txtEmail, EmergencyActivity.emailString);
 				
-		    	//updateTextField(R.id.txtLocation, EmergencyActivity.locationString);
-				//updateTextField(R.id.txtSMS, EmergencyActivity.smsString);
-				//updateTextField(R.id.txtEmail, EmergencyActivity.emailString);
+				updateXV(imgLocation, EmergencyActivity.locationState);
+				updateXV(imgSms, EmergencyActivity.smsState);
+				updateXV(imgEmail, EmergencyActivity.emailState);
 				
-				updateXV(R.id.imgLocation, EmergencyActivity.locationState);
-				//updateXV(R.id.imgSMS, EmergencyActivity.smsState);
-				//updateXV(R.id.imgEmail, EmergencyActivity.emailState);
-				
-				emthis.setProgressBarIndeterminateVisibility(getIsSendingState());
-				Log.e(LOG_TAG, "Update gui finished.");
+				mLiveThis.setProgressBarIndeterminateVisibility(getIsSendingState());
 		    }
 		});
 	}
@@ -150,6 +157,17 @@ public class EmergencyActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		mLiveThis = this;
+		
+		txtEmail = (TextView)findViewById(R.id.txtEmail);
+		txtLocation = (TextView)findViewById(R.id.txtLocation);
+		txtSms = (TextView)findViewById(R.id.txtSMS);
+		
+		imgEmail = (ImageView)findViewById(R.id.imgEmail);
+		imgLocation = (ImageView)findViewById(R.id.imgLocation);
+		imgSms = (ImageView)findViewById(R.id.imgSMS);
+		
 		resumeEmergency();
 	}
 	

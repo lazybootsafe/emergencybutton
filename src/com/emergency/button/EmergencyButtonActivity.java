@@ -1,14 +1,20 @@
 package com.emergency.button;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.nullwire.trace.ExceptionHandler;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +24,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.text.InputType;
 import android.view.Gravity;
@@ -42,6 +49,20 @@ public class EmergencyButtonActivity extends Activity {
 		
 	}
 
+	private void popup(String title, String text) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(EmergencyButtonActivity.this);
+		builder.setMessage(text)
+			   .setTitle(title)
+		       .setCancelable(true)
+		       .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		        	   dialog.cancel();
+		           }
+		       });
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+	
 	private void initUI() {
 		setContentView(R.layout.main);
 
@@ -58,7 +79,22 @@ public class EmergencyButtonActivity extends Activity {
 		ImageButton btnHelp = (ImageButton) findViewById(R.id.btnHelp);
 		btnHelp.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				IntroActivity.open(EmergencyButtonActivity.this);
+				
+				// An activity may have been overkill AND for some reason
+				// it appears in the task switcher and doesn't allow returning to the 
+				// emergency configuration mode. So a dialog is better for this.
+				//IntroActivity.open(EmergencyButtonActivity.this);
+				
+				final String messages [] = {
+						"Welcome to Emergency Button, enter a phone number, email and message. They'll be saved for an emergency.",
+						"When you press the emergency button, or both widget buttons within 5 seconds, the distress signal is sent.",
+						"Add the widget at your home screen using:\nMenu->Add->Widgets->Emergency Button"
+					};
+				
+				// inverted order - They all popup and you hit "ok" to see the next one.
+				popup("Intro 3", messages[2]);
+				popup("Intro 2", messages[1]);
+				popup("Intro 1", messages[0]);
 			}
 		});
 
@@ -149,14 +185,15 @@ public class EmergencyButtonActivity extends Activity {
 		private LinearLayout mContainer;
 		private ArrayList<EditText> mEditTextList = null;
 		
-		public MoreEditText(LinearLayout container, List<String> stringsList) {
+		public MoreEditText(LinearLayout container, EditText textWidget, List<String> stringsList) {
 			// Create the rows from scratch, this should only happen onCreate
 			
 			mContainer = container;
 			mEditTextList = new ArrayList<EditText>();
 			//txtPhoneNo = (EditText) findViewById(R.id.txtPhoneNo);
 			EditText edit;
-			edit = getDefaultTextEdit(container);
+			//edit = getDefaultTextEdit(container);
+			edit = textWidget;
 			if(! stringsList.isEmpty()) {
 				edit.setText(stringsList.get(0));
 			}
@@ -166,7 +203,7 @@ public class EmergencyButtonActivity extends Activity {
 			}
 		}
 		
-		public void restore(LinearLayout container, List<String> stringsList) {
+		public void restore(LinearLayout container, EditText textWidget, List<String> stringsList) {
 			// Create the rows from older existing rows, this can happen on
 			// changes of orientation, onResume, etc
 			mContainer = container;
@@ -175,7 +212,8 @@ public class EmergencyButtonActivity extends Activity {
 				EditText edit;
 				if (i == 0) {
 					// the first row is the default one (with the "+")
-					edit = getDefaultTextEdit(container);
+					//edit = getDefaultTextEdit(container);
+					edit = textWidget;
 					mEditTextList.set(0, edit);
 					if (stringsList.size() > 0) {
 						edit.setText(stringsList.get(0));
@@ -228,30 +266,35 @@ public class EmergencyButtonActivity extends Activity {
 	private void addPhonesEmailsUI(List<String> phones, List<String> emails) {
 		LinearLayout phoneNoLin = (LinearLayout)findViewById(R.id.linPhoneNo);
 		LinearLayout emailLin = (LinearLayout)findViewById(R.id.linEmail);
+		EditText txtPhoneNo = (EditText)findViewById(R.id.txtPhoneNo);
+		EditText txtEmail = (EditText)findViewById(R.id.txtEmail);
 		// NOTE: we don't always create from scratch so that empty textboxes
 		//		aren't erased on changes of orientation.
 		if (mPhonesMoreEditText == null) {
-			mPhonesMoreEditText = new MoreEditText(phoneNoLin, phones);
-			mEmailsMoreEditText = new MoreEditText(emailLin, emails);
+			mPhonesMoreEditText = new MoreEditText(phoneNoLin, txtPhoneNo, phones);
+			mEmailsMoreEditText = new MoreEditText(emailLin, txtEmail, emails);
 		} else {
-			mPhonesMoreEditText.restore(phoneNoLin, phones);
-			mEmailsMoreEditText.restore(emailLin, emails);
+			mPhonesMoreEditText.restore(phoneNoLin, txtPhoneNo, phones);
+			mEmailsMoreEditText.restore(emailLin, txtEmail, emails);
 		}
 		
 		// register the Plus buttons
-		ImageButton btnPhoneNoPlus = (ImageButton) findViewById(R.id.btnPhoneNoPlus);
-		btnPhoneNoPlus.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				mPhonesMoreEditText.addRow("");
-			}
-		});
-		
-		ImageButton btnEmailPlus = (ImageButton) findViewById(R.id.btnEmailPlus);
-		btnEmailPlus.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				mEmailsMoreEditText.addRow("");
-			}
-		});
+		if (Config.manyContacts) {
+			/*
+			ImageButton btnPhoneNoPlus = (ImageButton) findViewById(R.id.btnPhoneNoPlus);
+			btnPhoneNoPlus.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					mPhonesMoreEditText.addRow("");
+				}
+			});
+			
+			ImageButton btnEmailPlus = (ImageButton) findViewById(R.id.btnEmailPlus);
+			btnEmailPlus.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					mEmailsMoreEditText.addRow("");
+				}
+			});*/
+		}
 	}
 	
 
@@ -309,12 +352,25 @@ public class EmergencyButtonActivity extends Activity {
 			break;
 			
 		case R.id.credits:
-			i.setData(Uri.parse("http://code.google.com/p/emergencybutton/source/browse/trunk/credits.txt"));  
-			startActivity(i);
+			Dialog dialog = new Dialog(this);
+
+			dialog.setContentView(R.layout.credits_dialog);
+			dialog.setTitle("Credits");
+
+			TextView text = (TextView) dialog.findViewById(R.id.textView);
+		    try {
+		        Resources res = getResources();
+		        InputStream in_s = res.openRawResource(R.raw.credits);
+
+		        byte[] b = new byte[in_s.available()];
+		        in_s.read(b);
+		        text.setText(new String(b));
+		    } catch (Exception e) {
+		        // e.printStackTrace();
+		        text.setText("Error: can't show credits.");
+		    }			
+			dialog.show();
 			break;
-		//case R.id.recalibrate_noise:
-		//	pd_.resetNoiseLevel();
-		//	break;
 		}
 		return true;
 	}

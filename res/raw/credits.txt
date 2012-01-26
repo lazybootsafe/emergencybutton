@@ -3,9 +3,14 @@ Emergency Button
 
 www.andluck.com
 
-Developing
+Development
 ---
-ubershmekel
+Yuval Greenfield - ubershmekel@gmail.com
+
+
+UX Designer
+---
+Derek 
 
 
 Testing

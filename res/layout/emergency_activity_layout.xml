@@ -32,7 +32,7 @@
 		        android:layout_width="fill_parent" 
 		        android:layout_height="fill_parent" 
 		        android:gravity="center_vertical"
-		        android:text="Getting location"
+		        android:text="Getting Current Location"
 		        />     
 		</LinearLayout>
 	
@@ -58,7 +58,7 @@
 		        android:layout_width="fill_parent" 
 		        android:layout_height="fill_parent" 
 		        android:gravity="center_vertical"
-		        android:text="sending SMS"
+		        android:text="Sending SMS"
 		        />     
 		</LinearLayout>
 	
@@ -84,7 +84,7 @@
 		        android:layout_width="fill_parent" 
 		        android:layout_height="fill_parent" 
 		        android:gravity="center_vertical"
-		        android:text="sending email"
+		        android:text="Sending Email"
 		        />     
 		</LinearLayout>
 		

@@ -9,7 +9,7 @@
 	</style>
 	
 	<style name="Theme.Main">
-	    <!-- item name="android:windowBackground" >@drawable/appbackground</item> -->
+	    <item name="android:windowBackground" >@drawable/appbackground</item>
 	    <item name="android:windowNoTitle">true</item>
 	    <item name="android:colorForeground">#fff</item>
 	</style>

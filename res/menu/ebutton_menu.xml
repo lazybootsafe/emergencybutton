@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/project_page"
           android:icon="@drawable/web"
-          android:title="Andluck's page"
+          android:title="Andluck's Page"
           />
     <item android:id="@+id/credits"
           android:icon="@drawable/credits"

@@ -33,7 +33,8 @@ public class EmailSender {
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost("https://emailbyweb.appspot.com/email");
+		//HttpPost httppost = new HttpPost("https://emailbyweb.appspot.com/email");
+		HttpPost httppost = new HttpPost("http://toplessproductions.com/emailbyweb/");
 
 		try {
 			// Add your data
