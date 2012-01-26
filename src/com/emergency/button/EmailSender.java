@@ -28,19 +28,28 @@ public class EmailSender {
 	}
 	
 	public static boolean sendWithEmailbyweb(String to, String subject, String message) {
-		
+		// NOTE: the "from" is ignored in the php version currently.
+		boolean res = postToUrl("http://toplessproductions.com/emailbyweb/", "Emergency Button <EmergencyButtonApp@gmail.com>", to, subject,message);
+		if(!res) {
+			res = postToUrl("https://emailbyweb.appspot.com/email", "Emergency Button <EmergencyButton@emailbyweb.appspotmail.com>", to, subject,message);
+		}
+		return res;
+	}
+	
+	public static boolean postToUrl(String url, String from, String to, String subject, String message) {
 		String responseBody = "";
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
 		//HttpPost httppost = new HttpPost("https://emailbyweb.appspot.com/email");
-		HttpPost httppost = new HttpPost("http://toplessproductions.com/emailbyweb/");
+		//HttpPost httppost = new HttpPost("http://toplessproductions.com/emailbyweb/");
+		HttpPost httppost = new HttpPost(url);
 
 		try {
 			// Add your data
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
 			nameValuePairs.add(new BasicNameValuePair("to", to));
-			nameValuePairs.add(new BasicNameValuePair("from", "Emergency Button <EmergencyButton@emailbyweb.appspotmail.com>")); //"Emergency Button <EmergencyButtonApp@gmail.com>"));
+			nameValuePairs.add(new BasicNameValuePair("from", from));
 			nameValuePairs.add(new BasicNameValuePair("subject", subject));
 			nameValuePairs.add(new BasicNameValuePair("message", message));
 			nameValuePairs.add(new BasicNameValuePair("secret", Config.secret));
