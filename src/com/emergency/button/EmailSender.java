@@ -63,10 +63,8 @@ public class EmailSender {
 	        responseBody = httpclient.execute(httppost, responseHandler);
 	        
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			Log.e(LOG_TAG, e.getMessage(), e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			Log.e(LOG_TAG, e.getMessage(), e);
 		}
 		

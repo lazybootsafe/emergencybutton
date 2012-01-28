@@ -439,7 +439,7 @@ public class EmergencyActivity extends Activity {
 			try {
 				smsThread.join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				Log.e(LOG_TAG, e.getMessage(), e);
 				e.printStackTrace();
 			}
 		}
