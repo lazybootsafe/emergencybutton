@@ -59,13 +59,13 @@
                     android:inputType="textEmailAddress"        
                     android:hint="Email"
                     />
-                <!--ImageButton
+                <ImageButton
                     android:id="@+id/btnEmailPlus"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:background="@drawable/grey_plus"
                     android:layout_gravity="center"
-                    /-->
+                    />
             </LinearLayout>
        </LinearLayout>
         
@@ -106,13 +106,13 @@
                     android:inputType="phone"        
                     android:hint="SMS Number"
                     />
-                <!--ImageButton
+                <ImageButton
                     android:id="@+id/btnPhoneNoPlus"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:background="@drawable/grey_plus"
                     android:layout_gravity="center"
-                    /-->
+                    />
             </LinearLayout>
         </LinearLayout>
         
