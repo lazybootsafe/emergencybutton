@@ -1,0 +1,5 @@
+syntax: glob
+*.class
+bin/*
+R.java
+src/com/emergency/button/Config.java
