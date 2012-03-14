@@ -16,6 +16,12 @@ What's New
 
 =============
 
+2012-03
+
+Email address validation.
+
+
+
 2012-01-26
 
 Beautiful UX Redesign by Derek Keeler - derekfordesign@gmail.com

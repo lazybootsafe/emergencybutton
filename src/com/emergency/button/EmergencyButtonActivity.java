@@ -13,6 +13,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -79,28 +80,31 @@ public class EmergencyButtonActivity extends Activity {
 		ImageButton btnHelp = (ImageButton) findViewById(R.id.btnHelp);
 		btnHelp.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				
-				// An activity may have been overkill AND for some reason
-				// it appears in the task switcher and doesn't allow returning to the 
-				// emergency configuration mode. So a dialog is better for this.
-				//IntroActivity.open(EmergencyButtonActivity.this);
-				
-				final String messages [] = {
-						"Welcome to Emergency Button, enter a phone number, email and message. They'll be saved for an emergency.",
-						"When you press the emergency button, or both widget buttons within 5 seconds, the distress signal is sent.",
-						"Add the widget at your home screen using:\nMenu->Add->Widgets->Emergency Button"
-					};
-				
-				// inverted order - They all popup and you hit "ok" to see the next one.
-				popup("Intro 3", messages[2]);
-				popup("Intro 2", messages[1]);
-				popup("Intro 1", messages[0]);
+				popupHelp();
 			}
 		});
 
 
 		/*Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);  
 		startActivityForResult(intent, CONTACT_PICKER_RESULT);*/
+	}
+	
+	public void popupHelp() {
+		// An activity may have been overkill AND for some reason
+		// it appears in the task switcher and doesn't allow returning to the 
+		// emergency configuration mode. So a dialog is better for this.
+		//IntroActivity.open(EmergencyButtonActivity.this);
+		
+		final String messages [] = {
+				"Welcome to Emergency Button, enter a phone number, email and message. They'll be saved for an emergency.",
+				"When you press the emergency button, or both widget buttons within 5 seconds, the distress signal is sent.",
+				"Add the widget at your home screen using:\nMenu->Add->Widgets->Emergency Button"
+			};
+		
+		// inverted order - They all popup and you hit "ok" to see the next one.
+		popup("3/3", messages[2]);
+		popup("2/3", messages[1]);
+		popup("1/3", messages[0]);		
 	}
 	
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -127,7 +131,8 @@ public class EmergencyButtonActivity extends Activity {
 	{
 		super.onResume();
 		initUI();
-		IntroActivity.openOnceAfterInstallation(this);
+		//IntroActivity.openOnceAfterInstallation(this);
+		helpOnceAfterInstallation();
 	}
 	
 	
@@ -153,6 +158,27 @@ public class EmergencyButtonActivity extends Activity {
 		EmergencyData emergency = new EmergencyData(this);
 		emergency.setPhone(txtPhoneNo.getText().toString());
 	}*/
+	
+	public void helpOnceAfterInstallation() {
+		// runs only on the first time opening
+		final String wasOpenedName = "wasOpened";
+		final String introDbName = "introActivityState";
+		SharedPreferences settings = this.getSharedPreferences(introDbName, Context.MODE_PRIVATE);
+		boolean wasOpened = settings.getBoolean(wasOpenedName, false);
+		
+		if (wasOpened) {
+			return;
+		}
+		
+		// mark that it was opened once
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean(wasOpenedName, true);
+		editor.commit();
+		
+		//IntroActivity.open(context);
+		
+		popupHelp();
+	}	
 
 	private class EditTextRow {
 		LinearLayout mLinlay;
@@ -312,11 +338,24 @@ public class EmergencyButtonActivity extends Activity {
 		EditText txtEmail = (EditText) findViewById(R.id.txtEmail);
 
 		EmergencyData emergencyData = new EmergencyData(this);
+		List<String> emailsList = mEmailsMoreEditText.GetTexts();
+
 		emergencyData.setPhones(mPhonesMoreEditText.GetTexts());
-		emergencyData.setEmails(mEmailsMoreEditText.GetTexts());
+		emergencyData.setEmails(emailsList);
 		//emergencyData(txtPhoneNo.getText().toString());
 		//emergencyData(txtEmail.getText().toString());
 		emergencyData.setMessage(txtMessage.getText().toString());
+		
+		
+		for (int i = 0; i < emailsList.size(); i++) {
+			if (!EmailSender.isValidEmail(emailsList.get(i))) {
+				Toast.makeText(this, "Invalid email " + emailsList.get(i),
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+		
+		Toast.makeText(this, "Saved emergency data",
+				Toast.LENGTH_SHORT).show();
 	}
 
 	public void redButtonPressed() {
